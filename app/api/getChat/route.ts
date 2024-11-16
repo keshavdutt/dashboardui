@@ -9,11 +9,12 @@ import {
   TogetherAIStreamPayload,
 } from "@/utils/TogetherAIStream";
 
-// Define the maximum allowed duration for the process
-export const maxDuration = 60;
-
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic'; // always run dynamically
+
+
+export const maxDuration = 60;
+
 
 // POST endpoint handler to process incoming requests
 export async function POST(request: Request): Promise<Response> {

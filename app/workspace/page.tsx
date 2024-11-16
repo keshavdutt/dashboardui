@@ -3,6 +3,9 @@
 
 
 "use client";
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 
 import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
