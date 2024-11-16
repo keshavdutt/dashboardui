@@ -19,7 +19,11 @@ import "react-quill-new/dist/quill.snow.css";
 import jsPDF from 'jspdf';
 
 // NoteArea component to display and edit notes
-const NoteArea = ({ content: selectedNoteContent, copiedText }) => {
+// const NoteArea = ({ content: selectedNoteContent, copiedText }) => {
+const NoteArea = () => {
+    let selectedNoteContent = {content: ''}
+    let copiedText = ''
+
     // Refs to handle the Quill editor instance
     const quillRef = useRef(null);
     // State to manage the content, modal visibility, and note title

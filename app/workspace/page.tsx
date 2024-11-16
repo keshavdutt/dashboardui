@@ -139,7 +139,7 @@ export default function Page() {
           <NoteArea />
 
           {/* Right Side: Chat area, visible based on `showChat` state */}
-          {showChat && <ChatArea  handleChat={handleChat} messages={messages} setMessages={setMessages} />}
+          {/* {showChat && <ChatArea  handleChat={handleChat} messages={messages} setMessages={setMessages} />} */}
         </div>
       </SidebarInset>
     </SidebarProvider>
