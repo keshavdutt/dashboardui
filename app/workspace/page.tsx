@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { MessageCircle, PanelRightClose } from "lucide-react"
+import { Bookmark, FileDown, FilePenLine, MessageCircle, NotebookText, PanelRightClose } from "lucide-react"
 import {
     SidebarInset,
     SidebarProvider,
@@ -71,25 +71,28 @@ export default function Page() {
                                     title="Edit"
                                     className="hover:text-white transition"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m0 0l7 7-7 7m0-14v14" />
-                                    </svg>
+                                    </svg> */}
+                                    <FilePenLine className="w-6 h-6" />
                                 </button>
                                 <button
                                     title="Bookmark"
                                     className="hover:text-white transition"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v16l7-5 7 5V3a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
-                                    </svg>
+                                    </svg> */}
+                                     <Bookmark className="w-6 h-6" />
                                 </button>
                                 <button
                                     title="Download"
                                     className="hover:text-white transition"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v4m0 0H8m4 0h4m-4-8v4m0 0H8m4 0h4m0 0l-4-4m4 0L12 4M4 20h16" />
-                                    </svg>
+                                    </svg> */}
+                                     <FileDown className="w-6 h-6" />
                                 </button>
                             </div>
                         </div>

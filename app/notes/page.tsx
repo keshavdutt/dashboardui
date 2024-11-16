@@ -21,6 +21,7 @@ import {
   Folder,
   ChevronRight,
   Book,
+  NotebookText,
 } from "lucide-react";
 
 export default function NotesPage() {
@@ -46,7 +47,8 @@ export default function NotesPage() {
         content: "Discuss project deadlines and deliverables.",
         lastEdited: "2024-03-15T10:30:00",
         color: "bg-blue-500/10"
-    }]
+    }
+  ]
 
   const handleCreateNote = () => {
     window.location.href = '/playground';
@@ -81,11 +83,15 @@ export default function NotesPage() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-gray-900">
+        <main className="flex-1 gap-4 p-4 pt-0 overflow-auto ">
+        {/* <main className="flex-1 overflow-auto bg-gray-900"> */}
+
+        {/* <div className="flex flex-1 gap-4 p-4 pt-0"> */}
           {notes.length > 0 ? (
-            <div className="p-6">
+            // <div className="p-6">
+              <div className='flex-1 flex flex-col h-full min-h-[100vh] rounded-xl bg-muted/50 md:min-h-min  p-4 space-y-4'>
               {/* Page Header */}
-              <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-white">My Notes</h1>
                 <Button 
                   onClick={handleCreateNote}
@@ -103,7 +109,7 @@ export default function NotesPage() {
                     key={note.id}
                     className="group flex items-center gap-3 rounded-lg p-3 hover:bg-gray-800"
                   >
-                    <Book className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                    <NotebookText className="h-4 w-4 flex-shrink-0 text-gray-400" />
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-medium text-white truncate">
                         {note.title}

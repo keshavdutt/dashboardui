@@ -35,82 +35,19 @@ export default function CollectionPage() {
             color: "bg-blue-500/10"
         },
         {
-            id: 1,
+            id: 2,
             title: "Meeting Notes",
             content: "Discuss project deadlines and deliverables.",
             lastEdited: "2024-03-15T10:30:00",
             color: "bg-blue-500/10"
         },
         {
-            id: 1,
+            id: 3,
             title: "Meeting Notes",
             content: "Discuss project deadlines and deliverables.",
             lastEdited: "2024-03-15T10:30:00",
             color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
-        {
-            id: 1,
-            title: "Meeting Notes",
-            content: "Discuss project deadlines and deliverables.",
-            lastEdited: "2024-03-15T10:30:00",
-            color: "bg-blue-500/10"
-        },
+        }
         // Add more notes as needed
     ];
 
@@ -249,16 +186,16 @@ export default function CollectionPage() {
                                     <FilePlus className="h-6 w-6 text-blue-500" />
                                 </div>
                                 <h2 className="mb-2 text-xl font-semibold text-white">
-                                    No notes yet
+                                    No Collection yet
                                 </h2>
                                 <p className="mb-6 text-sm text-gray-400">
-                                    Create your first note to get started with organizing your thoughts and ideas.
+                                    Create your first collection to get started with organizing your thoughts and ideas.
                                 </p>
                                 <Button
                                     onClick={handleCreateNote}
                                     className="w-full bg-blue-600 hover:bg-blue-700"
                                 >
-                                    Create New Note
+                                    Create New Collection
                                 </Button>
                             </div>
                         </div>

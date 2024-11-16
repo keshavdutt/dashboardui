@@ -10,8 +10,11 @@ import {
   Frame,
   GalleryVerticalEnd,
   Ham,
+  LayoutDashboard,
   Map,
   Menu,
+  Notebook,
+  NotebookText,
   PieChart,
   Settings2,
   SquareTerminal,
@@ -82,22 +85,22 @@ const data = {
     {
       name: "Workspace",
       url: "/workspace",
-      icon: Menu,
+      icon: BookOpen,
     },
     {
       name: "Dashboard",
       url: "/dashboard",
-      icon: Menu,
+      icon: LayoutDashboard,
     },
     {
       name: "Notes",
       url: "/notes",
-      icon: Book,
+      icon: NotebookText,
     },
     {
       name: "Collection",
       url: "/collection",
-      icon: Book,
+      icon: Notebook,
     }
   ],
 }
