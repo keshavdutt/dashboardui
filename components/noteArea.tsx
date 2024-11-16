@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
+
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
@@ -15,25 +16,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Dynamically import ReactQuill, only on the client side
-const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false }) as unknown as React.ComponentType<any>;
+// Dynamically import ReactQuill
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import "react-quill-new/dist/quill.snow.css";
 import jsPDF from 'jspdf';
 
+// const NoteArea = ({ content: selectedNoteContent, copiedText }) => {
 // NoteArea component to display and edit notes
 const NoteArea = () => {
     const selectedNoteContent = { content: '' };
     let copiedText = '';
-
-    // Refs to handle the Quill editor instance
-    const quillRef = useRef<typeof ReactQuill | null>(null);
-
-    // State to manage the content, modal visibility, and note title
+    const quillRef = useRef(null);
     const [content, setContent] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [noteTitle, setNoteTitle] = useState('');
 
-    // Define modules for ReactQuill toolbar
     const modules = {
         toolbar: [
             [{ header: [1, 2, 3, false] }],
@@ -45,7 +42,6 @@ const NoteArea = () => {
         ],
     };
 
-    // Define formats for ReactQuill toolbar
     const formats = [
         "header",
         "bold",
@@ -61,14 +57,12 @@ const NoteArea = () => {
         "code-block",
     ];
 
-    // Effect to set the content if a selected note is passed
     useEffect(() => {
         if (selectedNoteContent) {
             setContent(selectedNoteContent.content);
         }
     }, [selectedNoteContent]);
 
-    // Effect to append copied text to the note content
     useEffect(() => {
         if (copiedText && quillRef.current) {
             const quill = quillRef.current.getEditor();
@@ -79,12 +73,10 @@ const NoteArea = () => {
         }
     }, [copiedText]);
 
-    // Handler for content changes in the Quill editor
-    const handleChange = (value: string) => {
+    const handleChange = (value) => {
         setContent(value);
     };
 
-    // Function to download the note content as a PDF
     const downloadAsPdf = () => {
         if (quillRef.current) {
             const quill = quillRef.current.getEditor();
@@ -94,7 +86,6 @@ const NoteArea = () => {
             const pageHeight = doc.internal.pageSize.getHeight();
             let y = 20;
 
-            // Iterate through delta ops and add them to the PDF
             delta.ops.forEach((op) => {
                 if (op.insert) {
                     if (typeof op.insert === 'string') {
@@ -111,14 +102,12 @@ const NoteArea = () => {
                 }
             });
 
-            // Save the generated PDF
             doc.save('note-content.pdf');
         }
     };
 
-    // Function to save the note to local storage
     const saveToLocalStorage = () => {
-        const existingNotes = JSON.parse(localStorage.getItem('savedNotes') || '[]');
+        const existingNotes = JSON.parse(localStorage.getItem('savedNotes')) || [];
         const noteIndex = existingNotes.findIndex(note => note.title === noteTitle);
 
         if (noteIndex > -1) {
@@ -132,33 +121,49 @@ const NoteArea = () => {
         setNoteTitle('');
     };
 
-    copiedText = 'Hello world';
+    copiedText = 'Hello world'
 
     return (
-        <div className="w-1/2">
+        <div className="w-1/2 ">
             <Card className="h-full flex flex-col bg-muted/50 md:min-h-min">
                 <CardContent className="flex-1 p-4">
                     {copiedText?.length > 0 || selectedNoteContent?.content?.length > 0 ? (
                         <div className='flex flex-col gap-4 h-[calc(100vh-120px)]'>
+
+                            {/* Title Area */}
                             <div className="flex items-center justify-between border-b border-gray-700 pb-2">
                                 <input
                                     type="text"
                                     placeholder="Untitled Document"
                                     className="text-2xl font-bold bg-transparent outline-none text-white flex-1"
                                 />
+
                                 <div className="flex space-x-4 text-gray-400">
-                                    <button title="Edit" className="hover:text-white transition">
+                                    <button
+                                        title="Edit"
+                                        className="hover:text-white transition"
+                                    >
                                         <FilePenLine className="w-6 h-6" />
                                     </button>
-                                    <button title="Bookmark" className="hover:text-white transition">
+                                    <button
+                                        title="Bookmark"
+                                        className="hover:text-white transition"
+                                    >
                                         <Bookmark className="w-6 h-6" />
                                     </button>
-                                    <button title="Download" className="hover:text-white transition">
+                                    <button
+                                        title="Download"
+                                        className="hover:text-white transition"
+                                    >
                                         <FileDown className="w-6 h-6" />
                                     </button>
                                 </div>
                             </div>
-                            <div className="h-[calc(100vh-180px)] flex-1">
+
+
+                            {/* <div className="h-[calc(100%-4rem)] [&_.ql-container]:border-0 [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:bg-muted [&_.ql-toolbar]:rounded-t-lg"> */}
+                            <div className="h-[calc(100vh-180px)] flex-1 [&_.ql-container]:border-0 [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:bg-muted [&_.ql-toolbar]:rounded-t-lg [&_.ql-container]:bg-transparent [&_.ql-editor]:text-white [&_.ql-editor]:text-base [&_.ql-editor]:leading-relaxed [&_.ql-snow.ql-toolbar_button]:text-white [&_.ql-snow_.ql-stroke]:stroke-white [&_.ql-snow_.ql-fill]:fill-white [&_.ql-snow_.ql-picker]:text-white [&_.ql-editor.ql-blank::before]:text-white">
+
                                 <ReactQuill
                                     ref={quillRef}
                                     theme="snow"
@@ -184,6 +189,7 @@ const NoteArea = () => {
                     )}
                 </CardContent>
             </Card>
+
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent>
                     <DialogHeader>
