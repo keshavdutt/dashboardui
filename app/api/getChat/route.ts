@@ -42,6 +42,8 @@ export async function POST(request: Request): Promise<Response> {
     return new Response(stream, {
       headers: new Headers({
         "Cache-Control": "no-cache", // Disable caching for real-time updates
+        'Content-Type': 'text/event-stream',
+		'X-Content-Type-Options': 'nosniff'
       }),
     });
   } catch (error) {
