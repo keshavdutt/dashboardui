@@ -9,9 +9,6 @@ import {
   TogetherAIStreamPayload,
 } from "@/utils/TogetherAIStream";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic'; // always run dynamically
-
 
 export const maxDuration = 60;
 
