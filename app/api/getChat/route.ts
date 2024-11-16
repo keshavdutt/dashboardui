@@ -1,4 +1,9 @@
 // Import necessary utilities for streaming with Together AI
+
+import { unstable_noStore as noStore } from 'next/cache';
+
+
+
 import {
   TogetherAIStream,
   TogetherAIStreamPayload,
@@ -9,6 +14,8 @@ export const maxDuration = 60;
 
 // POST endpoint handler to process incoming requests
 export async function POST(request: Request): Promise<Response> {
+    noStore();
+
   // Parse the incoming JSON payload from the request
   const { messages }: { messages: TogetherAIStreamPayload["messages"] } = 
     await request.json();
