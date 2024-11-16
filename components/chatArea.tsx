@@ -67,7 +67,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                 setTimeout(() => scrollToBottom(), 100);
             }
         }
-    }, [messages]);
+    }, [messages, isNearBottom]);
 
     // Initial scroll to bottom
     useEffect(() => {
