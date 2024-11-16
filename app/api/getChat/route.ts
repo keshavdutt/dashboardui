@@ -35,6 +35,9 @@ import {
       return new Response(stream, {
         headers: new Headers({
           "Cache-Control": "no-cache", // Disable caching for real-time updates
+          "Access-Control-Allow-Origin": "*", // Allow all origins (adjust as needed)
+          "Access-Control-Allow-Methods": "POST",
+          "Content-Type": "application/json",
         }),
       });
     } catch (error) {
