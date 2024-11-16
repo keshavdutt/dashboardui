@@ -1,6 +1,6 @@
 "use client"
 import { AppSidebar } from "@/components/app-sidebar"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -11,15 +11,39 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Bookmark, FileDown, FilePenLine, MessageCircle, NotebookText, PanelRightClose } from "lucide-react"
+import { Bookmark, FileDown, FilePenLine, MessageCircle, PanelRightClose } from "lucide-react"
 import {
     SidebarInset,
     SidebarProvider,
     SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+
+
+const modules = {
+    toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['link', 'blockquote', 'code-block'],
+        ['clean']
+    ],
+}
+
+const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'color', 'background',
+    'link', 'blockquote', 'code-block',
+]
 
 export default function Page() {
     const [showChat, setShowChat] = useState(true)
+    const [editorContent, setEditorContent] = useState('')
 
     return (
         <SidebarProvider>
@@ -71,37 +95,36 @@ export default function Page() {
                                     title="Edit"
                                     className="hover:text-white transition"
                                 >
-                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m0 0l7 7-7 7m0-14v14" />
-                                    </svg> */}
                                     <FilePenLine className="w-6 h-6" />
                                 </button>
                                 <button
                                     title="Bookmark"
                                     className="hover:text-white transition"
                                 >
-                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v16l7-5 7 5V3a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
-                                    </svg> */}
-                                     <Bookmark className="w-6 h-6" />
+                                    <Bookmark className="w-6 h-6" />
                                 </button>
                                 <button
                                     title="Download"
                                     className="hover:text-white transition"
                                 >
-                                    {/* <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v4m0 0H8m4 0h4m-4-8v4m0 0H8m4 0h4m0 0l-4-4m4 0L12 4M4 20h16" />
-                                    </svg> */}
-                                     <FileDown className="w-6 h-6" />
+                                    <FileDown className="w-6 h-6" />
                                 </button>
                             </div>
                         </div>
 
-                        <textarea
-                            placeholder="Start writing here..."
-                            className="flex-1 bg-transparent outline-none text-gray-300 resize-none text-base leading-relaxed"
-                            rows={20}
-                        ></textarea>
+                        {/* Quill Editor */}
+                        <div className="flex-1 [&_.ql-container]:border-0 [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:bg-muted [&_.ql-toolbar]:rounded-t-lg [&_.ql-container]:bg-transparent [&_.ql-editor]:text-white [&_.ql-editor]:text-base [&_.ql-editor]:leading-relaxed [&_.ql-snow.ql-toolbar_button]:text-white [&_.ql-snow_.ql-stroke]:stroke-white [&_.ql-snow_.ql-fill]:fill-white [&_.ql-snow_.ql-picker]:text-white [&_.ql-editor.ql-blank::before]:text-white">
+                            <ReactQuill
+                                value={editorContent}
+                                onChange={setEditorContent}
+                                modules={modules}
+                                formats={formats}
+                                theme="snow"
+                                placeholder="Start writing here..."
+                                className="h-[95%]"
+                            />
+                        </div>
+
                     </div>
 
                     {/* Right Side (Chatbot) */}
