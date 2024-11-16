@@ -21,7 +21,7 @@ import jsPDF from 'jspdf';
 // NoteArea component to display and edit notes
 // const NoteArea = ({ content: selectedNoteContent, copiedText }) => {
 const NoteArea = () => {
-    let selectedNoteContent = {content: ''}
+    const selectedNoteContent = {content: ''}
     let copiedText = ''
 
     // Refs to handle the Quill editor instance
