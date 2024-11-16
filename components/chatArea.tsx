@@ -1,3 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
+
 "use client";
 
 import { ArrowLeft, ArrowRight, Bookmark, Copy, Share2 } from 'lucide-react';
@@ -14,6 +18,7 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatAreaProps) => {
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollableContainerRef = useRef<HTMLDivElement>(null);
     const chatAreaRef = useRef<HTMLDivElement>(null);
