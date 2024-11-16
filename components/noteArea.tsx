@@ -14,18 +14,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 // Dynamically import ReactQuill, only on the client side
-const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false }) as unknown as React.ComponentType<any>;
 import "react-quill-new/dist/quill.snow.css";
 import jsPDF from 'jspdf';
 
 // NoteArea component to display and edit notes
-// const NoteArea = ({ content: selectedNoteContent, copiedText }) => {
 const NoteArea = () => {
-    const selectedNoteContent = {content: ''}
-    let copiedText = ''
+    const selectedNoteContent = { content: '' };
+    let copiedText = '';
 
     // Refs to handle the Quill editor instance
-    const quillRef = useRef(null);
+    const quillRef = useRef<typeof ReactQuill | null>(null);
+
     // State to manage the content, modal visibility, and note title
     const [content, setContent] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,7 +78,7 @@ const NoteArea = () => {
     }, [copiedText]);
 
     // Handler for content changes in the Quill editor
-    const handleChange = (value) => {
+    const handleChange = (value: string) => {
         setContent(value);
     };
 
@@ -116,72 +116,47 @@ const NoteArea = () => {
 
     // Function to save the note to local storage
     const saveToLocalStorage = () => {
-        // Get existing notes from local storage
-        const existingNotes = JSON.parse(localStorage.getItem('savedNotes')) || [];
-        // Find the note with the same title
+        const existingNotes = JSON.parse(localStorage.getItem('savedNotes') || '[]');
         const noteIndex = existingNotes.findIndex(note => note.title === noteTitle);
 
         if (noteIndex > -1) {
-            // If note exists, update its content
             existingNotes[noteIndex].content = content;
         } else {
-            // If note does not exist, create a new note
             existingNotes.push({ title: noteTitle, content });
         }
 
-        // Save the updated notes to local storage
         localStorage.setItem('savedNotes', JSON.stringify(existingNotes));
-        setIsModalOpen(false); // Close the modal after saving
-        setNoteTitle(''); // Clear the note title
+        setIsModalOpen(false);
+        setNoteTitle('');
     };
 
-    // For testing: Assign a static copiedText value (can be removed later)
     copiedText = 'Hello world';
 
     return (
         <div className="w-1/2">
-            {/* Card to hold the content editor */}
             <Card className="h-full flex flex-col bg-muted/50 md:min-h-min">
                 <CardContent className="flex-1 p-4">
-                    {/* Check if there is copiedText or selectedNoteContent */}
                     {copiedText?.length > 0 || selectedNoteContent?.content?.length > 0 ? (
                         <div className='flex flex-col gap-4 h-[calc(100vh-120px)]'>
-
-                            {/* Title Area */}
                             <div className="flex items-center justify-between border-b border-gray-700 pb-2">
-                                {/* Input field for the note title */}
                                 <input
                                     type="text"
                                     placeholder="Untitled Document"
                                     className="text-2xl font-bold bg-transparent outline-none text-white flex-1"
                                 />
-
-                                {/* Toolbar buttons for Edit, Bookmark, and Download */}
                                 <div className="flex space-x-4 text-gray-400">
-                                    <button
-                                        title="Edit"
-                                        className="hover:text-white transition"
-                                    >
+                                    <button title="Edit" className="hover:text-white transition">
                                         <FilePenLine className="w-6 h-6" />
                                     </button>
-                                    <button
-                                        title="Bookmark"
-                                        className="hover:text-white transition"
-                                    >
+                                    <button title="Bookmark" className="hover:text-white transition">
                                         <Bookmark className="w-6 h-6" />
                                     </button>
-                                    <button
-                                        title="Download"
-                                        className="hover:text-white transition"
-                                    >
+                                    <button title="Download" className="hover:text-white transition">
                                         <FileDown className="w-6 h-6" />
                                     </button>
                                 </div>
                             </div>
-
-                            {/* Quill editor container */}
-                            <div className="h-[calc(100vh-180px)] flex-1 [&_.ql-container]:border-0 [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:bg-muted [&_.ql-toolbar]:rounded-t-lg [&_.ql-container]:bg-transparent [&_.ql-editor]:text-white [&_.ql-editor]:text-base [&_.ql-editor]:leading-relaxed [&_.ql-snow.ql-toolbar_button]:text-white [&_.ql-snow_.ql-stroke]:stroke-white [&_.ql-snow_.ql-fill]:fill-white [&_.ql-snow_.ql-picker]:text-white [&_.ql-editor.ql-blank::before]:text-white">
-                                {/* ReactQuill editor */}
+                            <div className="h-[calc(100vh-180px)] flex-1">
                                 <ReactQuill
                                     ref={quillRef}
                                     theme="snow"
@@ -207,22 +182,18 @@ const NoteArea = () => {
                     )}
                 </CardContent>
             </Card>
-
-            {/* Modal for saving the note */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Save Note</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
-                        {/* Input field for note title */}
                         <Input
                             placeholder="Note Title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
                         />
                         <div className="flex justify-end gap-2">
-                            {/* Cancel and Save buttons */}
                             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
                                 Cancel
                             </Button>
