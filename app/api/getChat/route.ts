@@ -1,6 +1,5 @@
 // Import necessary utilities for streaming with Together AI
 
-import { unstable_noStore as noStore } from 'next/cache';
 
 
 
@@ -12,9 +11,11 @@ import {
 // Define the maximum allowed duration for the process
 export const maxDuration = 60;
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic'; // always run dynamically
+
 // POST endpoint handler to process incoming requests
 export async function POST(request: Request): Promise<Response> {
-    noStore();
 
   // Parse the incoming JSON payload from the request
   const { messages }: { messages: TogetherAIStreamPayload["messages"] } = 
