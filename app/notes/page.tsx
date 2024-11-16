@@ -54,7 +54,7 @@ export default function NotesPage() {
     window.location.href = '/playground';
   };
 
-  const handleEditNote = (noteId) => {
+  const handleEditNote = (noteId: string) => {
     window.location.href = `/playground?id=${noteId}`;
   };
 
