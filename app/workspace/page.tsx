@@ -1,6 +1,7 @@
-"use client"
-import { AppSidebar } from "@/components/app-sidebar"
-import { useState, useEffect } from "react"
+"use client";
+
+import { AppSidebar } from "@/components/app-sidebar";
+import { useState } from "react";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -8,42 +9,50 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Bookmark, FileDown, FilePenLine, MessageCircle, PanelRightClose } from "lucide-react"
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Bookmark, FileDown, FilePenLine, MessageCircle, PanelRightClose } from "lucide-react";
 import {
     SidebarInset,
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
+import dynamic from "next/dynamic";
 
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
-
+// Dynamically import ReactQuill
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+import "react-quill-new/dist/quill.snow.css";
 
 const modules = {
     toolbar: [
-        [{ 'header': [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-        [{ 'color': [] }, { 'background': [] }],
-        ['link', 'blockquote', 'code-block'],
-        ['clean']
+        [{ header: [1, 2, 3, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ color: [] }, { background: [] }],
+        ["link", "blockquote", "code-block"],
+        ["clean"],
     ],
-}
+};
 
 const formats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet',
-    'color', 'background',
-    'link', 'blockquote', 'code-block',
-]
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "bullet",
+    "color",
+    "background",
+    "link",
+    "blockquote",
+    "code-block",
+];
 
 export default function Page() {
-    const [showChat, setShowChat] = useState(true)
-    const [editorContent, setEditorContent] = useState('')
+    const [showChat, setShowChat] = useState(true);
+    const [editorContent, setEditorContent] = useState("");
 
     return (
         <SidebarProvider>
@@ -81,7 +90,11 @@ export default function Page() {
 
                 <div className="flex flex-1 gap-4 p-4 pt-0">
                     {/* Left Side (Editor) */}
-                    <div className={`flex-1 flex flex-col min-h-[100vh] rounded-xl bg-muted/50 md:min-h-min p-4 space-y-4 ${showChat ? '' : 'w-full'}`}>
+                    <div
+                        className={`flex-1 flex flex-col min-h-[100vh] rounded-xl bg-muted/50 md:min-h-min p-4 space-y-4 ${
+                            showChat ? "" : "w-full"
+                        }`}
+                    >
                         {/* Title Area */}
                         <div className="flex items-center justify-between border-b border-gray-700 pb-2">
                             <input
@@ -124,7 +137,6 @@ export default function Page() {
                                 className="h-[95%]"
                             />
                         </div>
-
                     </div>
 
                     {/* Right Side (Chatbot) */}
@@ -167,5 +179,5 @@ export default function Page() {
                 </div>
             </SidebarInset>
         </SidebarProvider>
-    )
+    );
 }
