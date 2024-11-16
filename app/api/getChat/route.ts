@@ -10,7 +10,7 @@ import {
   // POST endpoint handler to process incoming requests
   export async function POST(request: Request): Promise<Response> {
     // Parse the incoming JSON payload from the request
-    let { messages }: { messages: TogetherAIStreamPayload["messages"] } = 
+    const { messages }: { messages: TogetherAIStreamPayload["messages"] } = 
       await request.json();
     
     console.log("[POST] Request received with messages:", messages);
