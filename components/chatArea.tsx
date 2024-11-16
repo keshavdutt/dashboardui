@@ -4,6 +4,9 @@
 
 "use client";
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 import { ArrowLeft, ArrowRight, Bookmark, Copy, Share2 } from 'lucide-react';
 import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import ReactMarkdown from "react-markdown";
