@@ -5,52 +5,60 @@
 
 
 import {
-  TogetherAIStream,
-  TogetherAIStreamPayload,
-} from "@/utils/TogetherAIStream";
-
-
-export const maxDuration = 60;
-
-
-// POST endpoint handler to process incoming requests
-export async function POST(request: Request): Promise<Response> {
-
-  // Parse the incoming JSON payload from the request
-  const { messages }: { messages: TogetherAIStreamPayload["messages"] } = 
-    await request.json();
+    TogetherAIStream,
+    TogetherAIStreamPayload,
+  } from "@/utils/TogetherAIStream";
   
-  console.log("[POST] Request received with messages:", messages);
-
-  try {
-    // Log that the Together API stream request is being initiated
-    console.log("[POST] Fetching answer stream from Together API");
-
-    // Construct the payload to send to Together AI
-    const payload: TogetherAIStreamPayload = {
-      model: "meta-llama/Llama-Vision-Free", // Specify the AI model to use
-      messages,                             // Pass chat messages
-      stream: true,                         // Enable streaming response
-    };
-
-    console.log("[POST] Payload constructed:", payload);
-
-    // Fetch the streaming response from Together AI
-    const stream = await TogetherAIStream(payload);
-
-    // Return the stream response to the client
-    return new Response(stream, {
-      headers: new Headers({
-        "Cache-Control": "no-cache", // Disable caching for real-time updates
-        'Content-Type': 'text/event-stream',
-		'X-Content-Type-Options': 'nosniff'
-      }),
-    });
-  } catch (error) {
-    // Log the error for debugging
-    console.error("[POST] Error fetching answer stream:", error);
-
-    // Return a failure response with a custom status
-    return new Response("Error: Answer stream failed.", { status: 202 });
+  // Configure for edge runtime
+  export const runtime = 'edge';
+  
+  // Remove maxDuration as it's not needed for edge functions
+  // export const maxDuration = 60;
+  
+  // Modify the handler to work with edge runtime
+  export async function POST(request: Request): Promise<Response> {
+    try {
+      const { messages }: { messages: TogetherAIStreamPayload["messages"] } = 
+        await request.json();
+      
+      console.log("[POST] Request received with messages:", messages);
+  
+      const payload: TogetherAIStreamPayload = {
+        model: "meta-llama/Llama-Vision-Free",
+        messages,
+        stream: true,
+        max_tokens: 2000, // Add a reasonable limit
+        temperature: 0.7, // Add temperature for consistent behavior
+      };
+  
+      console.log("[POST] Payload constructed:", payload);
+  
+      const stream = await TogetherAIStream(payload);
+  
+      // Set up proper headers for streaming in Vercel
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-transform',
+          'Connection': 'keep-alive',
+          'X-Content-Type-Options': 'nosniff',
+          'Content-Encoding': 'none',
+          'Transfer-Encoding': 'chunked'
+        },
+      });
+    } catch (error) {
+      console.error("[POST] Error in stream processing:", error);
+      
+      // Return a more detailed error response
+      return new Response(
+        JSON.stringify({
+          error: "Stream processing failed",
+          details: error instanceof Error ? error.message : "Unknown error"
+        }), {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+      });
+    }
   }
-}
