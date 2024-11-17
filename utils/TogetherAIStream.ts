@@ -28,7 +28,9 @@ import {
     const decoder = new TextDecoder();
   
     // Make a POST request to the Together AI API with the provided payload
-    const res = await fetch("https://together.helicone.ai/v1/chat/completions", {
+    // const res = await fetch("https://together.helicone.ai/v1/chat/completions", {
+    const res = await fetch("https://api.together.xyz/v1/chat/completions", {
+
       headers: {
         "Content-Type": "application/json",                     // Specify JSON content type
         // "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`, // Custom authentication header
