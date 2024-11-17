@@ -34,74 +34,178 @@ export default function Page() {
   // State to store the chat messages
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Function to handle chat requests
-  const handleChat = async (messages: Message[]) => {
-    console.log('I got called up bro');
+//   // Function to handle chat requests
+//   const handleChat = async (messages: Message[]) => {
+//     console.log('I got called up bro');
 
-    // Fetch the chat response from the server
-    const chatRes = await fetch("/api/getChat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ messages }),
-    });
+//     // Fetch the chat response from the server
+//     const chatRes = await fetch("/api/getChat", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ messages }),
+//     });
 
-    // If the response is not successful, throw an error
-    if (!chatRes.ok) {
-      throw new Error(chatRes.statusText);
-    }
+//     // If the response is not successful, throw an error
+//     if (!chatRes.ok) {
+//       throw new Error(chatRes.statusText);
+//     }
 
-    // Readable stream from the server response body
-    const data = chatRes.body;
-    console.log('This is the readable data', data);
+//     // Readable stream from the server response body
+//     const data = chatRes.body;
+//     console.log('This is the readable data', data);
 
-    if (!data) {
-      return;
-    }
+//     if (!data) {
+//       return;
+//     }
 
-    let fullAnswer = ""; // To accumulate the full response
+//     let fullAnswer = ""; // To accumulate the full response
 
-    // Function to handle each event chunk
-    const onParse = (event: ParsedEvent | ReconnectInterval) => {
-      if (event.type === "event") {
-        const data = event.data;
-        try {
-          // Parse the response and extract the text
-          const text = JSON.parse(data).text ?? "";
-          fullAnswer += text;
+//     // Function to handle each event chunk
+//     const onParse = (event: ParsedEvent | ReconnectInterval) => {
+//       if (event.type === "event") {
+//         const data = event.data;
+//         try {
+//           // Parse the response and extract the text
+//           const text = JSON.parse(data).text ?? "";
+//           fullAnswer += text;
 
-          // Update messages with the new content
-          setMessages((prev) => {
-            const lastMessage = prev[prev.length - 1];
-            // Check if the last message is from the assistant and update or add a new message
-            if (lastMessage.role === "assistant") {
-              return [
-                ...prev.slice(0, -1),
-                { ...lastMessage, content: lastMessage.content + text },
-              ];
-            } else {
-              return [...prev, { role: "assistant", content: text }];
-            }
-          });
-        } catch (e) {
-          console.error('Error parsing event data', e);
-        }
+//           // Update messages with the new content
+//           setMessages((prev) => {
+//             const lastMessage = prev[prev.length - 1];
+//             // Check if the last message is from the assistant and update or add a new message
+//             if (lastMessage.role === "assistant") {
+//               return [
+//                 ...prev.slice(0, -1),
+//                 { ...lastMessage, content: lastMessage.content + text },
+//               ];
+//             } else {
+//               return [...prev, { role: "assistant", content: text }];
+//             }
+//           });
+//         } catch (e) {
+//           console.error('Error parsing event data', e);
+//         }
+//       }
+//     };
+
+//     // Set up a reader for the stream and parser to handle chunks of data
+//     const reader = data.getReader();
+//     const decoder = new TextDecoder();
+//     const parser = createParser(onParse);
+//     let done = false;
+
+//     // Read the data in chunks until done
+//     while (!done) {
+//       const { value, done: doneReading } = await reader.read();
+//       done = doneReading;
+//       const chunkValue = decoder.decode(value);
+//       parser.feed(chunkValue);
+//     }
+//   };
+
+
+const handleChat = async (messages: Message[]) => {
+    try {
+      console.log('Initiating chat request');
+  
+      const chatRes = await fetch("/api/getChat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages }),
+      });
+  
+      if (!chatRes.ok) {
+        throw new Error(`HTTP error! status: ${chatRes.status} ${chatRes.statusText}`);
       }
-    };
-
-    // Set up a reader for the stream and parser to handle chunks of data
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    const parser = createParser(onParse);
-    let done = false;
-
-    // Read the data in chunks until done
-    while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      parser.feed(chunkValue);
+  
+      const data = chatRes.body;
+      if (!data) {
+        throw new Error("No response data received");
+      }
+  
+      let fullAnswer = "";
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+  
+      // Create a function to process each chunk of data
+      const processChunk = (chunk: string) => {
+        try {
+          // Check if the chunk is a valid JSON string
+          if (chunk.startsWith('data: ')) {
+            const jsonStr = chunk.slice(6); // Remove 'data: ' prefix
+            const jsonData = JSON.parse(jsonStr);
+            
+            if (jsonData.text) {
+              fullAnswer += jsonData.text;
+  
+              setMessages((prev) => {
+                const lastMessage = prev[prev.length - 1];
+                if (lastMessage?.role === "assistant") {
+                  return [
+                    ...prev.slice(0, -1),
+                    { ...lastMessage, content: fullAnswer }
+                  ];
+                } else {
+                  return [...prev, { role: "assistant", content: jsonData.text }];
+                }
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Error processing chunk:', e);
+          console.log('Problematic chunk:', chunk);
+        }
+      };
+  
+      let buffer = '';
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          
+          if (done) {
+            // Process any remaining buffer data
+            if (buffer) {
+              processChunk(buffer);
+            }
+            break;
+          }
+  
+          // Decode the chunk and add to buffer
+          const chunkText = decoder.decode(value, { stream: true });
+          buffer += chunkText;
+  
+          // Process complete messages in buffer
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep the incomplete line in buffer
+  
+          // Process each complete line
+          for (const line of lines) {
+            if (line.trim()) {
+              processChunk(line.trim());
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error reading stream:', error);
+        throw error;
+      } finally {
+        reader.releaseLock();
+      }
+  
+    } catch (error) {
+      console.error('Chat request failed:', error);
+      // Handle the error appropriately in your UI
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "I apologize, but I encountered an error. Please try again."
+        }
+      ]);
     }
   };
 
