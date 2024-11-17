@@ -31,7 +31,7 @@ import {
     const res = await fetch("https://together.helicone.ai/v1/chat/completions", {
       headers: {
         "Content-Type": "application/json",                     // Specify JSON content type
-        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`, // Custom authentication header
+        // "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`, // Custom authentication header
         Authorization: `Bearer ${process.env.TOGETHER_API_KEY ?? ""}`, // API key for Together AI
       },
       method: "POST",                                           // HTTP POST method
