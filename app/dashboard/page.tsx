@@ -17,10 +17,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FilePenLine, Bookmark, FileDown } from "lucide-react"
+import { FilePenLine, Bookmark, Clock, Eye, Calendar } from "lucide-react"
 
 export default function Page() {
-
   const handleViewAllNotes = () => {
     window.location.href = '/notes';
   };
@@ -29,18 +28,55 @@ export default function Page() {
     window.location.href = '/collection';
   };
 
+  const recentCollections = [
+    {
+      title: "Data Structures",
+      description: "Comprehensive guide to fundamental data structures",
+      updatedAt: "3 days ago",
+      itemCount: 12
+    },
+    {
+      title: "System Design",
+      description: "Collection of system design patterns and principles",
+      updatedAt: "5 days ago",
+      itemCount: 8
+    }
+  ];
+
+  const recentProjects = [
+    { 
+      title: "Stack Data Structure",
+      desc: "Complete guide to implementing and using stacks",
+      views: 124,
+      updated: "1 hour ago"
+    },
+    { 
+      title: "LinkedIn Content Strategy",
+      desc: "Social media content planning and execution",
+      views: 89,
+      updated: "1 day ago"
+    },
+    { 
+      title: "Machine Learning Basics",
+      desc: "Introduction to ML concepts and applications",
+      views: 256,
+      updated: "15 days ago"
+    }
+  ];
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
+        {/* Header */}
+        <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center gap-4 border-b px-4">
+            <SidebarTrigger className="shrink-0" />
+            <Separator orientation="vertical" className="h-6" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
+                  <BreadcrumbLink href="#" className="text-muted-foreground hover:text-primary">
                     Planoeducation
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -50,86 +86,110 @@ export default function Page() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-          </div>
-          <div className="ml-auto mr-8">
-            <Button
-              variant="outline"
-            >
-              New Notes
-            </Button>
+            <div className="ml-auto flex items-center gap-4">
+              <Button
+                className="flex items-center gap-2"
+                variant="default"
+              >
+                <FilePenLine className="h-4 w-4" />
+                New Note
+              </Button>
+            </div>
           </div>
         </header>
-        {/* Main Area */}
 
-        <div className="flex flex-1 gap-4 p-4 pt-0">
-          <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
-            {/* Recent Repositories */}
-            <div>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-white">Recent Collection</h2>
-                <Button variant="link" size="sm" className="text-blue-400" onClick={handleViewAllCollection}>
-                  View All
-                </Button>
+        {/* Main Content */}
+        <main className="flex-1 space-y-8 p-8">
+          {/* Collections Section */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Recent Collections</h2>
+                <p className="text-sm text-muted-foreground">Your latest educational content collections</p>
               </div>
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Repository Card */}
-                {[...Array(2)].map((_, index) => (
-                  <Card key={index} className="bg-gray-800">
-                    <CardHeader>
-                      <CardTitle className="flex justify-between items-center">
-                        <span>Data Structures</span>
-                        <span className="text-sm text-gray-400">3 days ago</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-gray-500">Some description of the collection...</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <Button variant="ghost" size="sm" onClick={handleViewAllCollection} className="flex items-center gap-2">
+                View All
+                <Bookmark className="h-4 w-4" />
+              </Button>
             </div>
 
-            {/* Recent Projects */}
-            <div>
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-white">Recent projects</h2>
-                <Button variant="link" size="sm" className="text-blue-400" onClick={handleViewAllNotes}>
-                  View All
-                </Button>
+            <div className="grid gap-6 md:grid-cols-2">
+              {recentCollections.map((collection, index) => (
+                <Card key={index} className="hover:bg-muted/50 transition-colors">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-lg font-semibold">{collection.title}</CardTitle>
+                    <Button variant="ghost" size="icon">
+                      <Bookmark className="h-4 w-4" />
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {collection.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {collection.updatedAt}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <FilePenLine className="h-4 w-4" />
+                        {collection.itemCount} items
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* Projects Section */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Recent Projects</h2>
+                <p className="text-sm text-muted-foreground">Your latest work and notes</p>
               </div>
-              <div className="mt-4">
-                <Table className="bg-gray-800 rounded-lg">
-                  <TableHeader>
-                    <TableRow className="bg-gray-700 text-white">
-                      <TableHead className="px-4 py-2">Title</TableHead>
-                      <TableHead className="px-4 py-2">Description</TableHead>
-                      <TableHead className="px-4 py-2">Views</TableHead>
-                      <TableHead className="px-4 py-2">Updated</TableHead>
+              <Button variant="ghost" size="sm" onClick={handleViewAllNotes} className="flex items-center gap-2">
+                View All
+                <FilePenLine className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-center">Views</TableHead>
+                    <TableHead>Last Updated</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentProjects.map((project, index) => (
+                    <TableRow key={index} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">{project.title}</TableCell>
+                      <TableCell className="text-muted-foreground">{project.desc}</TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center gap-1">
+                          <Eye className="h-4 w-4" />
+                          {project.views}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {project.updated}
+                        </span>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[
-                      { title: "Stack Data Structure", desc: "something about tack", views: 1, updated: "1 hour ago" },
-                      { title: "linkedin post", desc: "Social media content", views: 1, updated: "1 day ago" },
-                      { title: "Machine Learning", desc: "Frontend tooling", views: 3, updated: "15 days ago" },
-                    ].map((project, index) => (
-                      <TableRow
-                        key={index}
-                        className="odd:bg-gray-900 even:bg-gray-800 hover:bg-gray-700 transition"
-                      >
-                        <TableCell className="px-4 py-2">{project.title}</TableCell>
-                        <TableCell className="px-4 py-2">{project.desc}</TableCell>
-                        <TableCell className="px-4 py-2">{project.views}</TableCell>
-                        <TableCell className="px-4 py-2">{project.updated}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </div>
-        </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </section>
+        </main>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

@@ -96,8 +96,10 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                 rect.right <= chatAreaRect.right) {
                 setSelectedText(selected.toString());
                 setButtonPosition({
-                    top: rect.top + window.scrollY + rect.height + 5,
-                    left: rect.left + window.scrollX,
+                    // top: rect.top + window.scrollY + rect.height + 5,
+                    // left: rect.left + window.scrollX,
+                    top: 0,
+                    left: 0
                 });
                 setShowSendButton(true);
             }
@@ -107,11 +109,15 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
     };
 
     useEffect(() => {
-        document.addEventListener('selectionchange', handleTextSelection);
-        return () => document.removeEventListener('selectionchange', handleTextSelection);
+        // Check if window is available (client-side only)
+        if (typeof window !== "undefined") {
+            document.addEventListener('selectionchange', handleTextSelection);
+            return () => document.removeEventListener('selectionchange', handleTextSelection);
+        }
     }, []);
 
     const handleSendToNotes = () => {
+        console.log('Selected text', selectedText)
         setCopiedText(selectedText);
         setShowSendButton(false);
     };
@@ -137,7 +143,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
     }
 
     return (
-        <div ref={chatAreaRef} className="w-1/2  h-[calc(100vh-80px)] ">
+        <div ref={chatAreaRef} className='h-full p-2'>
             <div className="flex flex-col h-full border border-solid border-gray-700 rounded-lg bg-muted/50 shadow-lg overflow-hidden">
                 <div
                     ref={scrollableContainerRef}

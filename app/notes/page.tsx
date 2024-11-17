@@ -13,65 +13,97 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Trash,
   Edit,
   MoreVertical,
   FilePlus,
-  Folder,
-  ChevronRight,
-  Book,
-  NotebookText,
+  File,
+  Clock,
+  Search,
+  Grid,
+  List,
+  FilePenLine,
+  Calendar,
+  Tags
 } from "lucide-react";
+import { Input } from '@/components/ui/input';
 
 export default function NotesPage() {
-//   const notes = []; // Empty for placeholder, add notes array to show list view
+  const [view, setView] = React.useState('list');
+  const [searchQuery, setSearchQuery] = React.useState('');
+
   const notes = [
     {
-        id: 1,
-        title: "Data Structures",
-        content: "Discuss project deadlines and deliverables.",
-        lastEdited: "2024-03-15T10:30:00",
-        color: "bg-blue-500/10"
+      id: 1,
+      title: "Data Structures",
+      content: "Advanced concepts in data structures and algorithms",
+      lastEdited: "2024-03-15T10:30:00",
+      category: "Computer Science",
+      tags: ["algorithms", "programming"],
+      color: "border-l-blue-500"
     },
     {
-        id: 2,
-        title: "Increase Inflations",
-        content: "Discuss project deadlines and deliverables.",
-        lastEdited: "2024-03-15T10:30:00",
-        color: "bg-blue-500/10"
+      id: 2,
+      title: "Economic Inflation Analysis",
+      content: "Current trends and future predictions in global economics",
+      lastEdited: "2024-03-14T15:45:00",
+      category: "Economics",
+      tags: ["finance", "global"],
+      color: "bg-green-500/10",
     },
     {
-        id: 2,
-        title: "Meeting Notes",
-        content: "Discuss project deadlines and deliverables.",
-        lastEdited: "2024-03-15T10:30:00",
-        color: "bg-blue-500/10"
+      id: 3,
+      title: "Team Meeting Notes",
+      content: "Project roadmap and milestone discussion",
+      lastEdited: "2024-03-13T09:15:00",
+      category: "Business",
+      tags: ["meetings", "planning"],
+      color: "border-l-purple-500"
     }
-  ]
+  ];
 
   const handleCreateNote = () => {
-    window.location.href = '/playground';
+    window.location.href = '/dashboard';
   };
 
-  const handleEditNote = (noteId: number) => {
-    window.location.href = `/playground?id=${noteId}`;
+  const handleEditNote = (noteId) => {
+    window.location.href = `/dashboard?id=${noteId}`;
   };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days} days ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const filteredCollection = notes.filter(note =>
+    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        {/* Header Section */}
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
+        {/* Header */}
+        <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center gap-4 border-b px-4">
+            <SidebarTrigger className="shrink-0" />
+            <Separator orientation="vertical" className="h-6" />
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">Planoeducation</BreadcrumbLink>
+                  <BreadcrumbLink href="#" className="text-muted-foreground hover:text-primary">
+                    Planoeducation
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
@@ -83,88 +115,207 @@ export default function NotesPage() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 gap-4 p-4 pt-0 overflow-auto ">
-        {/* <main className="flex-1 overflow-auto bg-gray-900"> */}
-
-        {/* <div className="flex flex-1 gap-4 p-4 pt-0"> */}
+        <main className="flex-1 p-8">
           {notes.length > 0 ? (
-            // <div className="p-6">
-              <div className='flex-1 flex flex-col h-full min-h-[100vh] rounded-xl bg-muted/50 md:min-h-min  p-4 space-y-4'>
+            <div className="space-y-6">
               {/* Page Header */}
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-white">My Notes</h1>
-                <Button 
-                  onClick={handleCreateNote}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                >
-                  <FilePlus className="h-4 w-4" />
-                  New Note
-                </Button>
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight">My Collections</h1>
+                  <p className="text-sm text-muted-foreground">
+                    {filteredCollection.length} notes in total
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={view === 'grid' ? 'bg-muted' : ''}
+                      onClick={() => setView('grid')}
+                    >
+                      <Grid className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={view === 'list' ? 'bg-muted' : ''}
+                      onClick={() => setView('list')}
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    onClick={handleCreateNote}
+                    className="flex items-center gap-2"
+                  >
+                    <FilePenLine className="h-4 w-4" />
+                    New Notes
+                  </Button>
+                </div>
               </div>
 
-              {/* Notes List */}
-              <div className="space-y-1">
-                {notes.map((note) => (
-                  <div
-                    key={note.id}
-                    className="group flex items-center gap-3 rounded-lg p-3 hover:bg-gray-800"
-                  >
-                    <NotebookText className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-white truncate">
-                        {note.title}
-                      </h3>
-                      <p className="text-xs text-gray-400">
-                        Last edited {new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-white"
-                        onClick={() => handleEditNote(note.id)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-white"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-gray-600" />
-                  </div>
-                ))}
+              {/* Search and Filters */}
+              <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search notes..."
+                    className="pl-9"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Date
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Tags className="h-4 w-4" />
+                    Tags
+                  </Button>
+                </div>
               </div>
+
+              {view === 'grid' ? (
+                // Grid View - keeping your original card design
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredCollection.map((note) => (
+                    <div
+                      key={note.id}
+                      className={`group relative flex flex-col rounded-lg border border-gray-800 ${note.color} p-4 hover:border-gray-700 hover:shadow-lg transition-all duration-200`}
+                      onClick={() => handleEditNote(note.id)}
+                    >
+                      <div className="flex items-start gap-3 mb-3">
+                        <File className="h-5 w-5 text-gray-400 flex-shrink-0 mt-1" />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-white truncate">
+                            {note.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                            <Clock className="h-3 w-3" />
+                            <span>Edited {formatDate(note.lastEdited)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-400 line-clamp-2 mb-3">
+                        {note.content}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 mt-auto">
+                        {note.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center rounded-full bg-gray-800/50 px-2 py-1 text-xs text-gray-400"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditNote(note.id);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-gray-400 hover:text-red-500 hover:bg-gray-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle delete
+                          }}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle more options
+                          }}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // List View - keeping your original list design
+                <div className="space-y-2">
+                  {filteredCollection.map((note) => (
+                    <div
+                      key={note.id}
+                      className="group flex items-center gap-4 rounded-lg border border-gray-800 bg-gray-800/50 p-4 hover:border-gray-700 hover:shadow-lg transition-all duration-200"
+                      onClick={() => handleEditNote(note.id)}
+                    >
+                      <File className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-white">{note.title}</h3>
+                        <p className="text-sm text-gray-400 line-clamp-1">{note.content}</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap gap-2">
+                          {note.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center rounded-full bg-gray-800 px-2 py-1 text-xs text-gray-400"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          {formatDate(note.lastEdited)}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-gray-700"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             // Empty State
-            <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center p-6 text-center">
-              <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 shadow-lg max-w-md w-full">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800">
-                  <FilePlus className="h-6 w-6 text-blue-500" />
+            <div className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center">
+              <div className="mx-auto max-w-md text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <FilePenLine className="h-6 w-6 text-primary" />
                 </div>
-                <h2 className="mb-2 text-xl font-semibold text-white">
-                  No notes yet
-                </h2>
-                <p className="mb-6 text-sm text-gray-400">
-                  Create your first note to get started with organizing your thoughts and ideas.
+                <h2 className="mb-2 text-xl font-semibold">No collections yet</h2>
+                <p className="mb-6 text-sm text-muted-foreground">
+                  Create your first collection to get started with organizing your documents.
                 </p>
-                <Button 
-                  onClick={handleCreateNote}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  Create New Note
+                <Button onClick={handleCreateNote} className="w-full">
+                  Create New Collection
                 </Button>
               </div>
             </div>
