@@ -121,7 +121,7 @@ export default function NotesPage() {
               {/* Page Header */}
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h1 className="text-2xl font-semibold tracking-tight">My Collections</h1>
+                  <h1 className="text-2xl font-semibold tracking-tight">My Notes</h1>
                   <p className="text-sm text-muted-foreground">
                     {filteredCollection.length} notes in total
                   </p>

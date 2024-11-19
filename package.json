@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.3.4",
     "@lexical/code": "^0.20.0",
     "@lexical/list": "^0.20.0",
     "@lexical/react": "^0.20.0",

@@ -1,10 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
 "use client";
 
 import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { SignIn, SignInButton, useAuth, useUser } from "@clerk/nextjs";
+
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -26,9 +25,8 @@ import {
 } from "lucide-react";
 
 import ChatArea from "@/components/chatArea";
-// import NoteArea from "@/components/noteArea";
-
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 const NoteArea = dynamic(() => import('@/components/noteArea'), { ssr: false });
 
@@ -38,11 +36,31 @@ interface Message {
 }
 
 export default function WorkspacePage() {
+    // Replace getAuth with useAuth hook for client components
+    const { userId, isLoaded } = useAuth();
+    const { user } = useUser();
+    console.log('this is the suer', user)
+    const pathname = usePathname();
     const [showChat, setShowChat] = useState<boolean>(true);
     const [messages, setMessages] = useState<Message[]>([]);
     const [saving, setSaving] = useState<boolean>(false);
-    const [selectedNoteContent, setSelectedNoteContent] = useState(""); // Add state for selected note content
-    const [copiedText, setCopiedText] = useState('')
+    const [selectedNoteContent, setSelectedNoteContent] = useState("");
+    const [copiedText, setCopiedText] = useState('');
+
+
+    // Show loading state while auth is being checked
+    if (!isLoaded) {
+        return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
+
+    // Show SignIn component if user is not authenticated
+    if (!userId) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <SignInButton />
+            </div>
+        );
+    }
 
 
 
@@ -74,7 +92,7 @@ export default function WorkspacePage() {
                     if (chunk.startsWith('data: ')) {
                         const jsonStr = chunk.slice(6);
                         const jsonData = JSON.parse(jsonStr);
-                        
+
                         if (jsonData.text) {
                             fullAnswer += jsonData.text;
                             setMessages((prev) => {
@@ -99,7 +117,7 @@ export default function WorkspacePage() {
             try {
                 while (true) {
                     const { value, done } = await reader.read();
-                    
+
                     if (done) {
                         if (buffer) {
                             processChunk(buffer);
@@ -137,7 +155,6 @@ export default function WorkspacePage() {
 
     const handleSave = async () => {
         setSaving(true);
-        // Simulate save operation
         await new Promise(resolve => setTimeout(resolve, 1000));
         setSaving(false);
     };
@@ -164,7 +181,7 @@ export default function WorkspacePage() {
                                 </BreadcrumbItem>
                             </BreadcrumbList>
                         </Breadcrumb>
-                        
+
                         <div className="ml-auto flex items-center gap-2">
                             <Button
                                 variant="outline"
@@ -216,6 +233,28 @@ export default function WorkspacePage() {
                                 )}
                             </Button>
                         </div>
+                        {/* User Information */}
+                        {/* <div className="ml-auto flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <img
+                                    src={user?.imageUrl}
+                                    className="h-8 w-8 rounded-full"
+                                />
+                                <span className="text-sm">{user?.firstName || "Anonymous User"}</span>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setShowChat(!showChat)}
+                                className={`h-8 w-8 ${showChat ? 'bg-muted' : ''}`}
+                            >
+                                {showChat ? (
+                                    <PanelRightClose className="h-4 w-4" />
+                                ) : (
+                                    <MessageCircle className="h-4 w-4" />
+                                )}
+                            </Button>
+                        </div> */}
                     </div>
                 </header>
 
@@ -225,15 +264,13 @@ export default function WorkspacePage() {
                     <div className={`flex-1 overflow-auto transition-all ${showChat ? 'mr-[600px]' : 'mr-0'}`}>
                         <div className="h-full p-2">
                             <NoteArea copiedText={copiedText} />
-
                         </div>
                     </div>
 
                     {/* Chat Area */}
                     <div
-                        className={`fixed right-0 top-16 bottom-0 w-[600px] border-l bg-background/95 backdrop-blur transition-all duration-300 ease-in-out ${
-                            showChat ? 'translate-x-0' : 'translate-x-full'
-                        }`}
+                        className={`fixed right-0 top-16 bottom-0 w-[600px] border-l bg-background/95 backdrop-blur transition-all duration-300 ease-in-out ${showChat ? 'translate-x-0' : 'translate-x-full'
+                            }`}
                     >
                         {showChat && (
                             <ChatArea

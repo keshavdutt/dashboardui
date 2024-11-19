@@ -1,17 +1,12 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
-
 "use client";
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-import { ArrowLeft, ArrowRight, Bookmark, Copy, Share2 } from 'lucide-react';
+import { ArrowLeft, Bookmark, Copy, Share2 } from 'lucide-react';
 import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import ReactMarkdown from "react-markdown";
-import remarkGfm from 'remark-gfm';  // Add this import
-
+import remarkGfm from 'remark-gfm';
 
 interface ChatAreaProps {
     handleChat: (messages: { role: string; content: string }[]) => void;
@@ -21,10 +16,11 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatAreaProps) => {
-
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollableContainerRef = useRef<HTMLDivElement>(null);
     const chatAreaRef = useRef<HTMLDivElement>(null);
+    const floatingBarRef = useRef<HTMLDivElement>(null);
+
     const [isNearBottom, setIsNearBottom] = useState(true);
     const [selectedText, setSelectedText] = useState('');
     const [showSendButton, setShowSendButton] = useState(false);
@@ -32,7 +28,6 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
     const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
     const [initialText, setInitialText] = useState('Ask Something');
 
-    // Improved scroll to bottom function with smooth behavior
     const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
         const scrollContainer = scrollableContainerRef.current;
         if (scrollContainer) {
@@ -43,17 +38,15 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         }
     };
 
-    // Check if user is near bottom
     const checkIfNearBottom = () => {
         const container = scrollableContainerRef.current;
         if (container) {
-            const threshold = 100; // pixels from bottom
+            const threshold = 100;
             const isNear = container.scrollHeight - (container.scrollTop + container.clientHeight) < threshold;
             setIsNearBottom(isNear);
         }
     };
 
-    // Handle scroll events
     useEffect(() => {
         const container = scrollableContainerRef.current;
         if (container) {
@@ -62,88 +55,124 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         }
     }, []);
 
-    // Handle new messages
     useEffect(() => {
         if (messages.length > 0) {
-            // Always scroll to bottom on user message
             if (messages[messages.length - 1].role === 'user') {
                 scrollToBottom('instant');
             }
-            // Scroll to bottom on assistant message only if user was near bottom
             else if (isNearBottom) {
-                // Add a small delay to ensure content is rendered
                 setTimeout(() => scrollToBottom(), 100);
             }
         }
     }, [messages, isNearBottom]);
 
-    // Initial scroll to bottom
     useEffect(() => {
         scrollToBottom('instant');
     }, []);
 
+    const calculatePosition = (selectionRect: DOMRect, chatAreaRect: DOMRect) => {
+        const floatingBarWidth = 320;
+        const floatingBarHeight = 56;
+        const padding = 8;
+
+        // Calculate position relative to the chat area's fixed container
+        const top = selectionRect.top - chatAreaRect.top + padding;
+        let left = selectionRect.left - chatAreaRect.left;
+
+        // Ensure the floating bar stays within the chat area
+        if (left + floatingBarWidth > chatAreaRect.width - padding) {
+            left = chatAreaRect.width - floatingBarWidth - padding;
+        }
+        if (left < padding) {
+            left = padding;
+        }
+
+        // Check if floating bar would go below visible area
+        const bottomSpace = chatAreaRect.height - (top + floatingBarHeight);
+        const finalTop = bottomSpace < padding ? top - floatingBarHeight - padding * 2 : top + selectionRect.height;
+
+        return { 
+            top: Math.max(padding, Math.min(finalTop, chatAreaRect.height - floatingBarHeight - padding)),
+            left 
+        };
+    };
+
     const handleTextSelection = () => {
         const selected = window.getSelection();
-        if (selected && selected.toString().trim()) {
-            const range = selected.getRangeAt(0);
-            const rect = range.getBoundingClientRect();
-            const chatAreaRect = chatAreaRef.current?.getBoundingClientRect();
+        const chatArea = chatAreaRef.current;
+        const scrollContainer = scrollableContainerRef.current;
 
-            if (chatAreaRect &&
-                rect.top >= chatAreaRect.top &&
-                rect.bottom <= chatAreaRect.bottom &&
-                rect.left >= chatAreaRect.left &&
-                rect.right <= chatAreaRect.right) {
-                setSelectedText(selected.toString());
-                setButtonPosition({
-                    // top: rect.top + window.scrollY + rect.height + 5,
-                    // left: rect.left + window.scrollX,
-                    top: 0,
-                    left: 0
-                });
-                setShowSendButton(true);
-            }
+        if (!selected || !chatArea || !scrollContainer) {
+            setShowSendButton(false);
+            return;
+        }
+
+        const selectedText = selected.toString().trim();
+        if (!selectedText) {
+            setShowSendButton(false);
+            return;
+        }
+
+        const range = selected.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        const chatAreaRect = chatArea.getBoundingClientRect();
+
+        // Check if selection is within bounds
+        if (rect.top >= chatAreaRect.top &&
+            rect.bottom <= chatAreaRect.bottom &&
+            rect.left >= chatAreaRect.left &&
+            rect.right <= chatAreaRect.right) {
+            
+            const position = calculatePosition(rect, chatAreaRect);
+            
+            setSelectedText(selectedText);
+            setButtonPosition(position);
+            setShowSendButton(true);
         } else {
             setShowSendButton(false);
         }
     };
 
     useEffect(() => {
-        // Check if window is available (client-side only)
         if (typeof window !== "undefined") {
             document.addEventListener('selectionchange', handleTextSelection);
-            return () => document.removeEventListener('selectionchange', handleTextSelection);
+            // Hide floating bar when clicking outside
+            const handleClickOutside = (e: MouseEvent) => {
+                if (floatingBarRef.current && !floatingBarRef.current.contains(e.target as Node)) {
+                    setShowSendButton(false);
+                }
+            };
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => {
+                document.removeEventListener('selectionchange', handleTextSelection);
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
         }
     }, []);
 
     const handleSendToNotes = () => {
-        console.log('Selected text', selectedText)
         setCopiedText(selectedText);
         setShowSendButton(false);
     };
 
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
         setInitialText('Follow up question');
-        if (e.key === "Enter") {
-            if (e.shiftKey) {
-                return;
-            } else {
-                e.preventDefault();
-                onSubmit();
-            }
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            onSubmit();
         }
     };
 
-    function onSubmit() {
+    const onSubmit = () => {
         if (!inputValue.trim()) return;
         const latestMessages = [...messages, { role: "user", content: inputValue }];
         setInputValue("");
         setMessages(latestMessages);
         handleChat(latestMessages);
-    }
+    };
 
     return (
-        <div ref={chatAreaRef} className='h-full p-2'>
+        <div ref={chatAreaRef} className="h-full p-2 relative">
             <div className="flex flex-col h-full border border-solid border-gray-700 rounded-lg bg-muted/50 shadow-lg overflow-hidden">
                 <div
                     ref={scrollableContainerRef}
@@ -165,27 +194,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                                                      prose-a:text-blue-400
                                                      prose-blockquote:text-gray-300 prose-blockquote:text-base
                                                      prose-blockquote:border-gray-700
-                                                     prose-li:text-base
-                                                     [&_table]:border-collapse
-                                                     [&_table]:w-full
-                                                     [&_table]:my-4
-                                                     [&_th]:border
-                                                     [&_th]:border-gray-700
-                                                     [&_th]:bg-gray-800
-                                                     [&_th]:p-2
-                                                     [&_th]:text-left
-                                                     [&_td]:border
-                                                     [&_td]:border-gray-700
-                                                     [&_td]:p-2
-                                                     [&_tr:hover]:bg-gray-800/50
-                                                     [&_thead]:bg-gray-800
-                                                     [&_thead_tr]:border-b-2
-                                                     [&_thead_tr]:border-gray-700
-                                                     [&_table]:rounded-lg
-                                                     [&_tbody_tr:last-child_td:first-child]:rounded-bl-lg
-                                                     [&_tbody_tr:last-child_td:last-child]:rounded-br-lg
-                                                     [&_thead_tr_th:first-child]:rounded-tl-lg
-                                                     [&_thead_tr_th:last-child]:rounded-tr-lg"
+                                                     prose-li:text-base"
                                         >
                                             {message.content}
                                         </ReactMarkdown>
@@ -207,14 +216,12 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                     )}
                 </div>
 
-                {/* Rest of the component remains the same */}
                 <div className="p-4 border-t border-gray-700 bg-gray-800">
                     <div className="flex gap-2">
                         <textarea
                             placeholder={initialText}
                             className="flex-1 p-4 bg-gray-700 text-white text-base placeholder-gray-400 border-none 
-                                     rounded-lg resize-none focus:outline-none focus:ring-2 
-                                     focus:ring-blue-500"
+                                     rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={inputValue}
                             onKeyDown={handleKeyDown}
                             onChange={(e) => setInputValue(e.target.value)}
@@ -222,8 +229,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                         />
                         <button
                             className="px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg 
-                                     hover:bg-blue-700 transition-colors disabled:opacity-50 
-                                     disabled:cursor-not-allowed"
+                                     hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={onSubmit}
                             disabled={!inputValue.trim()}
                         >
@@ -232,31 +238,31 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                     </div>
                 </div>
 
-                {/* Enhanced Floating Action Bar */}
+                {/* Floating Action Bar - Now positioned relative to chat area */}
                 {showSendButton && (
                     <div
-                        className="fixed z-50 flex items-center gap-2 p-2 bg-gray-800 border border-gray-700 
-                                 rounded-lg shadow-lg backdrop-blur-sm bg-opacity-95 transition-all duration-200 
-                                 transform hover:scale-102"
+                        ref={floatingBarRef}
+                        className="absolute z-50 flex items-center gap-2 p-2 bg-gray-800/95 border border-gray-700 
+                                     rounded-lg shadow-lg backdrop-blur-sm transition-all duration-200"
                         style={{
-                            top: buttonPosition.top,
-                            left: buttonPosition.left,
+                            top: `${buttonPosition.top}px`,
+                            left: `${buttonPosition.left}px`,
                         }}
                     >
                         <button
                             onClick={handleSendToNotes}
                             className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md
-                                     hover:bg-blue-700 transition-colors text-sm font-medium"
+                                         hover:bg-blue-700 transition-colors text-sm font-medium"
                         >
                             <ArrowLeft size={16} />
                             <span>Send to Notes</span>
                         </button>
 
-                        <div className="h-4 w-px bg-gray-700" /> {/* Divider */}
+                        <div className="h-4 w-px bg-gray-700" />
 
                         <button
                             className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md 
-                                     transition-colors"
+                                         transition-colors"
                             title="Copy to clipboard"
                         >
                             <Copy size={16} />
@@ -264,7 +270,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
 
                         <button
                             className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md 
-                                     transition-colors"
+                                         transition-colors"
                             title="Save for later"
                         >
                             <Bookmark size={16} />
@@ -272,7 +278,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
 
                         <button
                             className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md 
-                                     transition-colors"
+                                         transition-colors"
                             title="Share"
                         >
                             <Share2 size={16} />

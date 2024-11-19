@@ -9,6 +9,8 @@ import {
   Sparkles,
 } from "lucide-react"
 
+import { currentUser } from "@clerk/nextjs/server"
+
 import {
   Avatar,
   AvatarFallback,
