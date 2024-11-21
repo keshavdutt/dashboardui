@@ -79,11 +79,143 @@ body {
   }
 }
 
+.wmde-markdown ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.wmde-markdown ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+
+.w-md-editor ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
+
+.w-md-editor ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+}
+
+/* Dark mode styles for react-md-editor toolbar */
+.dark-editor .w-md-editor-toolbar {
+  background-color: #333; /* Dark background for toolbar */
+  color: #fff; /* Light text for buttons */
+  border-bottom: 1px solid #444; /* Optional: subtle border */
+}
+
+.dark-editor .w-md-editor-toolbar-item {
+  color: #ccc; /* Default button color */
+}
+
+.dark-editor .w-md-editor-toolbar-item:hover {
+  color: #fff; /* Button hover color */
+  background-color: #444; /* Optional: hover background */
+}
+
+/* General editor content spacing */
+.w-md-editor-content {
+  line-height: 1.6; /* Adjust line spacing for better readability */
+  font-size: 1rem; /* Set default font size */
+  color: #fff; /* Light text color for dark mode */
+  /* background-color: #aaa; */
+}
+
+/* Headings */
+.w-md-editor-content h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1.5rem 0 1rem; /* Space above and below */
+  line-height: 1.3;
+  color: #f0db4f; /* Example: Yellowish heading color */
+}
+
+.w-md-editor-content h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 1.25rem 0 1rem;
+  line-height: 1.4;
+  color: #00aaff; /* Example: Bluish heading color */
+}
+
+.w-md-editor-content h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1rem 0 0.75rem;
+  line-height: 1.4;
+  color: #f39c12; /* Example: Orange heading color */
+}
+
+/* Paragraphs */
+.w-md-editor-content p {
+  margin: 0.75rem 0; /* Space between paragraphs */
+  text-align: justify; /* Optional: Justify text for better alignment */
+}
+
+/* Lists */
+.w-md-editor-content ul {
+  list-style-type: disc; /* Bullet list style */
+  margin-left: 1.5rem;
+  margin-bottom: 1rem; /* Space below lists */
+}
+
+.w-md-editor-content ol {
+  list-style-type: decimal; /* Numbered list style */
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Blockquotes */
+.w-md-editor-content blockquote {
+  border-left: 4px solid #444; /* Dark left border */
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #aaa; /* Lighter color for quotes */
+  font-style: italic;
+}
+
+/* Code blocks */
+.w-md-editor-content pre {
+  background-color: #1e1e1e; /* Dark background */
+  color: #dcdcdc; /* Light text */
+  padding: 1rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  overflow-x: auto; /* Horizontal scrolling for long lines */
+  margin: 1rem 0;
+}
+
+/* Inline code */
+.w-md-editor-content code {
+  /* background-color: #333; */
+  /* color: #e91e63; Highlighted inline code */
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+
+/* Links */
+.w-md-editor-content a {
+  color: #4caf50; /* Green links */
+  text-decoration: none;
+}
+
+.w-md-editor-content a:hover {
+  text-decoration: underline;
+}
+
+
+
+
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

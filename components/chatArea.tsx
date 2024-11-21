@@ -3,8 +3,8 @@
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-import { ArrowLeft, Bookmark, Copy, Share2 } from 'lucide-react';
-import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { ArrowLeft, Bookmark, Copy, Share2, MoreHorizontal } from 'lucide-react';
+import React, { useState, useEffect, useRef, KeyboardEvent, useMemo } from 'react';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm';
 
@@ -15,18 +15,179 @@ interface ChatAreaProps {
     setCopiedText: (text: string) => void;
 }
 
+
+// Block component for rendering individual blocks with hover actions
+const BlockWithActions = React.memo(({ 
+    content, 
+    onCopy, 
+    className = '' 
+}: { 
+    content: string, 
+    onCopy: () => void, 
+    className?: string 
+}) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const blockRef = useRef<HTMLDivElement>(null);
+
+    const handleCopy = () => {
+        // Ensure proper markdown list formatting
+        const listFixedContent = content
+            // Normalize list items to ensure they start with '* ' or other list markers
+            .split('\n')
+            .map(line => {
+                // Remove multiple asterisks and ensure single asterisk + space
+                const listItemMatch = line.match(/^\s*(\*+)\s*(.+)$/);
+                if (listItemMatch) {
+                    return `* ${listItemMatch[2].trim()}`;
+                }
+                return line;
+            })
+            .join('\n')
+            .trim();
+
+        navigator.clipboard.writeText(listFixedContent);
+        onCopy();
+    };
+
+    return (
+        <div 
+            ref={blockRef}
+            className={`relative group transition-colors duration-200 
+                        ${isHovered ? 'bg-gray-800/50' : 'bg-transparent'}
+                        ${className}`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div className="prose prose-sm prose-invert max-w-none overflow-x-auto
+                             prose-headings:text-gray-100 prose-h1:text-xl prose-h2:text-lg
+                             prose-p:text-gray-200 prose-p:text-sm leading-relaxed
+                             prose-strong:text-gray-100
+                             prose-code:text-gray-100 prose-code:text-sm
+                             prose-pre:bg-gray-800 prose-pre:text-sm
+                             prose-a:text-blue-400
+                             prose-blockquote:text-gray-300 prose-blockquote:text-sm
+                             prose-blockquote:border-gray-700
+                             prose-li:text-sm
+                             relative">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {content}
+                </ReactMarkdown>
+            </div>
+            
+            <div className={`absolute top-0 right-0 z-10 flex items-center gap-1 
+                            opacity-0 group-hover:opacity-70 hover:opacity-100 
+                            transition-opacity duration-200 
+                            pointer-events-none group-hover:pointer-events-auto`}>
+                <button 
+                    onClick={handleCopy}
+                    className="p-1 bg-gray-700/50 text-gray-300 hover:text-white 
+                               rounded-md transition-colors"
+                    title="Copy block"
+                >
+                    <Copy size={14} />
+                </button>
+                <button 
+                    className="p-1 bg-gray-700/50 text-gray-300 hover:text-white 
+                               rounded-md transition-colors"
+                    title="More options"
+                >
+                    <MoreHorizontal size={14} />
+                </button>
+            </div>
+        </div>
+    );
+});
+
 const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatAreaProps) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollableContainerRef = useRef<HTMLDivElement>(null);
     const chatAreaRef = useRef<HTMLDivElement>(null);
-    const floatingBarRef = useRef<HTMLDivElement>(null);
 
     const [isNearBottom, setIsNearBottom] = useState(true);
-    const [selectedText, setSelectedText] = useState('');
-    const [showSendButton, setShowSendButton] = useState(false);
     const [inputValue, setInputValue] = useState("");
-    const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
     const [initialText, setInitialText] = useState('Ask Something');
+
+    // Function to split assistant messages into blocks while preserving markdown structure
+    const splitMessageIntoBlocks = (content: string) => {
+        // Split by double line breaks but preserve code blocks and lists
+        const blocks: string[] = [];
+        const lines = content.split('\n');
+        let currentBlock = '';
+        let isCodeBlock = false;
+        let isListBlock = false;
+
+        lines.forEach((line, index) => {
+            // Check for code block start/end
+            if (line.trim().startsWith('```')) {
+                isCodeBlock = !isCodeBlock;
+                currentBlock += line + '\n';
+                
+                // If closing a code block, start a new block
+                if (!isCodeBlock && currentBlock.trim() !== '') {
+                    blocks.push(currentBlock.trimEnd());
+                    currentBlock = '';
+                }
+                return;
+            }
+
+            // Handle code block content
+            if (isCodeBlock) {
+                currentBlock += line + '\n';
+                return;
+            }
+
+            // Check for list items
+            const isListItem = line.trim().match(/^[\d*+-]\s/);
+            if (isListItem && !isListBlock) {
+                isListBlock = true;
+            }
+
+            // If we're in a list block, continue adding list items
+            if (isListBlock) {
+                currentBlock += line + '\n';
+
+                // Check if the next line is not a list item to end the list block
+                const nextLineIsNotListItem = 
+                    index === lines.length - 1 || 
+                    !lines[index + 1].trim().match(/^[\d*+-]\s/);
+
+                if (nextLineIsNotListItem) {
+                    blocks.push(currentBlock.trimEnd());
+                    currentBlock = '';
+                    isListBlock = false;
+                }
+                return;
+            }
+
+            // Regular paragraph-like blocks
+            if (line.trim() === '' && currentBlock.trim() !== '') {
+                blocks.push(currentBlock.trimEnd());
+                currentBlock = '';
+            } else if (line.trim() !== '') {
+                currentBlock += line + '\n';
+            }
+        });
+
+        // Add any remaining content
+        if (currentBlock.trim() !== '') {
+            blocks.push(currentBlock.trimEnd());
+        }
+
+        return blocks.filter(block => block.trim() !== '');
+    };
+
+    // Memoized processed messages
+    const processedMessages = useMemo(() => {
+        return messages.map(message => {
+            if (message.role === 'assistant') {
+                return {
+                    ...message,
+                    blocks: splitMessageIntoBlocks(message.content)
+                };
+            }
+            return message;
+        });
+    }, [messages]);
 
     const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
         const scrollContainer = scrollableContainerRef.current;
@@ -70,91 +231,6 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         scrollToBottom('instant');
     }, []);
 
-    const calculatePosition = (selectionRect: DOMRect, chatAreaRect: DOMRect) => {
-        const floatingBarWidth = 320;
-        const floatingBarHeight = 56;
-        const padding = 8;
-
-        // Calculate position relative to the chat area's fixed container
-        const top = selectionRect.top - chatAreaRect.top + padding;
-        let left = selectionRect.left - chatAreaRect.left;
-
-        // Ensure the floating bar stays within the chat area
-        if (left + floatingBarWidth > chatAreaRect.width - padding) {
-            left = chatAreaRect.width - floatingBarWidth - padding;
-        }
-        if (left < padding) {
-            left = padding;
-        }
-
-        // Check if floating bar would go below visible area
-        const bottomSpace = chatAreaRect.height - (top + floatingBarHeight);
-        const finalTop = bottomSpace < padding ? top - floatingBarHeight - padding * 2 : top + selectionRect.height;
-
-        return { 
-            top: Math.max(padding, Math.min(finalTop, chatAreaRect.height - floatingBarHeight - padding)),
-            left 
-        };
-    };
-
-    const handleTextSelection = () => {
-        const selected = window.getSelection();
-        const chatArea = chatAreaRef.current;
-        const scrollContainer = scrollableContainerRef.current;
-
-        if (!selected || !chatArea || !scrollContainer) {
-            setShowSendButton(false);
-            return;
-        }
-
-        const selectedText = selected.toString().trim();
-        if (!selectedText) {
-            setShowSendButton(false);
-            return;
-        }
-
-        const range = selected.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        const chatAreaRect = chatArea.getBoundingClientRect();
-
-        // Check if selection is within bounds
-        if (rect.top >= chatAreaRect.top &&
-            rect.bottom <= chatAreaRect.bottom &&
-            rect.left >= chatAreaRect.left &&
-            rect.right <= chatAreaRect.right) {
-            
-            const position = calculatePosition(rect, chatAreaRect);
-            
-            setSelectedText(selectedText);
-            setButtonPosition(position);
-            setShowSendButton(true);
-        } else {
-            setShowSendButton(false);
-        }
-    };
-
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            document.addEventListener('selectionchange', handleTextSelection);
-            // Hide floating bar when clicking outside
-            const handleClickOutside = (e: MouseEvent) => {
-                if (floatingBarRef.current && !floatingBarRef.current.contains(e.target as Node)) {
-                    setShowSendButton(false);
-                }
-            };
-            document.addEventListener('mousedown', handleClickOutside);
-            return () => {
-                document.removeEventListener('selectionchange', handleTextSelection);
-                document.removeEventListener('mousedown', handleClickOutside);
-            };
-        }
-    }, []);
-
-    const handleSendToNotes = () => {
-        setCopiedText(selectedText);
-        setShowSendButton(false);
-    };
-
     const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
         setInitialText('Follow up question');
         if (e.key === "Enter" && !e.shiftKey) {
@@ -171,37 +247,34 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         handleChat(latestMessages);
     };
 
+    const handleBlockCopy = (block: string) => {
+        setCopiedText(block);
+    };
+
     return (
-        <div ref={chatAreaRef} className="h-full p-2 relative">
+        <div ref={chatAreaRef} className="h-full p-1 relative">
             <div className="flex flex-col h-full border border-solid border-gray-700 rounded-lg bg-muted/50 shadow-lg overflow-hidden">
                 <div
                     ref={scrollableContainerRef}
-                    className="flex-1 p-6 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800"
+                    className="flex-1 p-3 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800"
                 >
-                    {messages.length > 0 ? (
-                        <div className="space-y-6">
-                            {messages.map((message, index) =>
+                    {processedMessages.length > 0 ? (
+                        <div className="space-y-2">
+                            {processedMessages.map((message, index) =>
                                 message.role === "assistant" ? (
-                                    <div key={index} className="break-words text-gray-100 text-base">
-                                        <ReactMarkdown
-                                            remarkPlugins={[remarkGfm]}
-                                            className="prose prose-lg prose-invert max-w-none overflow-x-auto
-                                                     prose-headings:text-gray-100 prose-h1:text-2xl prose-h2:text-xl
-                                                     prose-p:text-gray-200 prose-p:text-base leading-relaxed
-                                                     prose-strong:text-gray-100
-                                                     prose-code:text-gray-100 prose-code:text-base
-                                                     prose-pre:bg-gray-800 prose-pre:text-base
-                                                     prose-a:text-blue-400
-                                                     prose-blockquote:text-gray-300 prose-blockquote:text-base
-                                                     prose-blockquote:border-gray-700
-                                                     prose-li:text-base"
-                                        >
-                                            {message.content}
-                                        </ReactMarkdown>
+                                    <div key={index} className="space-y-2">
+                                        {(message as any).blocks.map((block: string, blockIndex: number) => (
+                                            <BlockWithActions 
+                                                key={blockIndex}
+                                                content={block}
+                                                onCopy={() => handleBlockCopy(block)}
+                                                className="p-2 rounded-lg"
+                                            />
+                                        ))}
                                     </div>
                                 ) : (
                                     <div key={index} className="flex justify-end">
-                                        <p className="max-w-[80%] rounded-lg bg-blue-600 p-4 break-words text-white text-base">
+                                        <p className="max-w-[80%] rounded-lg bg-blue-600 p-2 break-words text-white text-sm">
                                             {message.content}
                                         </p>
                                     </div>
@@ -211,16 +284,16 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                         </div>
                     ) : (
                         <div className="flex h-full items-center justify-center">
-                            <p className="text-gray-400 text-lg">Ask questions to start learning</p>
+                            <p className="text-gray-400 text-base">Ask questions to start learning</p>
                         </div>
                     )}
                 </div>
 
-                <div className="p-4 border-t border-gray-700 bg-gray-800">
+                <div className="p-2 border-t border-gray-700 bg-gray-800">
                     <div className="flex gap-2">
                         <textarea
                             placeholder={initialText}
-                            className="flex-1 p-4 bg-gray-700 text-white text-base placeholder-gray-400 border-none 
+                            className="flex-1 p-2 bg-gray-700 text-white text-sm placeholder-gray-400 border-none 
                                      rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={inputValue}
                             onKeyDown={handleKeyDown}
@@ -228,7 +301,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                             rows={1}
                         />
                         <button
-                            className="px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg 
+                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg 
                                      hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={onSubmit}
                             disabled={!inputValue.trim()}
@@ -237,54 +310,6 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                         </button>
                     </div>
                 </div>
-
-                {/* Floating Action Bar - Now positioned relative to chat area */}
-                {showSendButton && (
-                    <div
-                        ref={floatingBarRef}
-                        className="absolute z-50 flex items-center gap-2 p-2 bg-gray-800/95 border border-gray-700 
-                                     rounded-lg shadow-lg backdrop-blur-sm transition-all duration-200"
-                        style={{
-                            top: `${buttonPosition.top}px`,
-                            left: `${buttonPosition.left}px`,
-                        }}
-                    >
-                        <button
-                            onClick={handleSendToNotes}
-                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md
-                                         hover:bg-blue-700 transition-colors text-sm font-medium"
-                        >
-                            <ArrowLeft size={16} />
-                            <span>Send to Notes</span>
-                        </button>
-
-                        <div className="h-4 w-px bg-gray-700" />
-
-                        <button
-                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md 
-                                         transition-colors"
-                            title="Copy to clipboard"
-                        >
-                            <Copy size={16} />
-                        </button>
-
-                        <button
-                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md 
-                                         transition-colors"
-                            title="Save for later"
-                        >
-                            <Bookmark size={16} />
-                        </button>
-
-                        <button
-                            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md 
-                                         transition-colors"
-                            title="Share"
-                        >
-                            <Share2 size={16} />
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );
