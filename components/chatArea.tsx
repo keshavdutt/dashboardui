@@ -98,6 +98,11 @@ const BlockWithActions = React.memo(({
     );
 });
 
+
+BlockWithActions.displayName = 'BlockWithActions';
+
+
+
 const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatAreaProps) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollableContainerRef = useRef<HTMLDivElement>(null);
@@ -314,5 +319,6 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         </div>
     );
 };
+
 
 export default ChatArea;

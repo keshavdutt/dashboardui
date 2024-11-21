@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { unified } from 'unified';
+
 import dynamic from "next/dynamic";
 import { Bookmark, FileDown, FilePenLine, X, SparklesIcon, RefreshCcw, Copy } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,6 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import jsPDF from 'jspdf';
 import MarkdownPreview from "@uiw/react-markdown-preview";
+import remarkHtml from 'remark-html';
+import remarkParse from 'remark-parse';
+
+
 
 // Dynamically import the markdown editor to reduce initial bundle size
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
@@ -106,7 +112,7 @@ const NoteArea = ({ copiedText }) => {
             const newContent = content.length > 0 ? content + '\n\n' + copiedText : copiedText;
             setContent(newContent);
         }
-    }, [copiedText]);
+    }, [copiedText, content]);
 
     // Load saved notes on component mount
     useEffect(() => {
@@ -145,10 +151,19 @@ const NoteArea = ({ copiedText }) => {
         const pageHeight = doc.internal.pageSize.getHeight();
         const pageWidth = doc.internal.pageSize.getWidth();
 
-        // Render markdown to plain text for PDF
+        // Convert markdown to HTML
+        const htmlContent = unified()
+            .use(remarkParse)
+            .use(remarkHtml)
+            .processSync(content)
+            .toString();
+
+        // Create temporary div and set HTML content
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = MarkdownPreview.renderHTML(content);
+        tempDiv.innerHTML = htmlContent;
         const textContent = tempDiv.textContent || tempDiv.innerText;
+
+
 
         // Split text into lines
         const lines = doc.splitTextToSize(textContent, pageWidth - 40);
