@@ -112,7 +112,7 @@ const NoteArea = ({ copiedText }) => {
             const newContent = content.length > 0 ? content + '\n\n' + copiedText : copiedText;
             setContent(newContent);
         }
-    }, [copiedText, content]);
+    }, [copiedText]);
 
     // Load saved notes on component mount
     useEffect(() => {
