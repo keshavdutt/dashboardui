@@ -257,6 +257,7 @@ const NoteArea = ({ copiedText }) => {
                                     //     color: 'white',
                                     // }}
                                     // className="dark-editor h-full"
+                                    visibleDragbar={false}
                                     />
 
                                     {/* Text Selection Toolbar */}
@@ -271,15 +272,15 @@ const NoteArea = ({ copiedText }) => {
                             </div>
                         ) : (
                             <div className="h-[calc(100vh-3rem)] flex items-center justify-center">
-                                <div className="text-center p-8 bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-700/50">
-                                    <p className="text-gray-400 text-lg">
-                                        Notes will appear here once you start adding content.
-                                        <br />
-                                        Select text and click send to notes, or start a new note.
-                                    </p>
-                                </div>
+                            <div className="text-center p-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                                <p className="text-gray-500 text-lg">
+                                    Notes will appear here once you start adding content.
+                                    <br />
+                                    Select text and click send to notes, or start a new note.
+                                </p>
                             </div>
-                        )}
+                        </div>
+                    )}
                     </CardContent>
                 </Card>
             </div>
