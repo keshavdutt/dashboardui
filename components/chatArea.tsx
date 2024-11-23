@@ -15,7 +15,6 @@ interface ChatAreaProps {
     setCopiedText: (text: string) => void;
 }
 
-
 // Block component for rendering individual blocks with hover actions
 const BlockWithActions = React.memo(({ 
     content, 
@@ -30,12 +29,9 @@ const BlockWithActions = React.memo(({
     const blockRef = useRef<HTMLDivElement>(null);
 
     const handleCopy = () => {
-        // Ensure proper markdown list formatting
         const listFixedContent = content
-            // Normalize list items to ensure they start with '* ' or other list markers
             .split('\n')
             .map(line => {
-                // Remove multiple asterisks and ensure single asterisk + space
                 const listItemMatch = line.match(/^\s*(\*+)\s*(.+)$/);
                 if (listItemMatch) {
                     return `* ${listItemMatch[2].trim()}`;
@@ -53,22 +49,22 @@ const BlockWithActions = React.memo(({
         <div 
             ref={blockRef}
             className={`relative group transition-colors duration-200 
-                        ${isHovered ? 'bg-gray-800/50' : 'bg-transparent'}
+                        ${isHovered ? 'bg-gray-100' : 'bg-transparent'}
                         ${className}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="prose prose-sm prose-invert max-w-none overflow-x-auto
-                             prose-headings:text-gray-100 prose-h1:text-xl prose-h2:text-lg
-                             prose-p:text-gray-200 prose-p:text-sm leading-relaxed
-                             prose-strong:text-gray-100
-                             prose-code:text-gray-100 prose-code:text-sm
-                             prose-pre:bg-gray-800 prose-pre:text-sm
-                             prose-a:text-blue-400
-                             prose-blockquote:text-gray-300 prose-blockquote:text-sm
-                             prose-blockquote:border-gray-700
-                             prose-li:text-sm
-                             relative">
+            <div className="prose prose-sm max-w-none overflow-x-auto
+                           prose-headings:text-gray-900 prose-h1:text-xl prose-h2:text-lg
+                           prose-p:text-gray-700 prose-p:text-sm leading-relaxed
+                           prose-strong:text-gray-900
+                           prose-code:text-gray-800 prose-code:text-sm
+                           prose-pre:bg-gray-100 prose-pre:text-sm
+                           prose-a:text-blue-600
+                           prose-blockquote:text-gray-600 prose-blockquote:text-sm
+                           prose-blockquote:border-gray-300
+                           prose-li:text-sm prose-li:text-gray-700
+                           relative">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {content}
                 </ReactMarkdown>
@@ -80,15 +76,15 @@ const BlockWithActions = React.memo(({
                             pointer-events-none group-hover:pointer-events-auto`}>
                 <button 
                     onClick={handleCopy}
-                    className="p-1 bg-gray-700/50 text-gray-300 hover:text-white 
-                               rounded-md transition-colors"
+                    className="p-1 bg-gray-200/80 text-gray-600 hover:text-gray-900 
+                             rounded-md transition-colors"
                     title="Copy block"
                 >
                     <Copy size={14} />
                 </button>
                 <button 
-                    className="p-1 bg-gray-700/50 text-gray-300 hover:text-white 
-                               rounded-md transition-colors"
+                    className="p-1 bg-gray-200/80 text-gray-600 hover:text-gray-900 
+                             rounded-md transition-colors"
                     title="More options"
                 >
                     <MoreHorizontal size={14} />
@@ -98,10 +94,7 @@ const BlockWithActions = React.memo(({
     );
 });
 
-
 BlockWithActions.displayName = 'BlockWithActions';
-
-
 
 const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatAreaProps) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -112,9 +105,8 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
     const [inputValue, setInputValue] = useState("");
     const [initialText, setInitialText] = useState('Ask Something');
 
-    // Function to split assistant messages into blocks while preserving markdown structure
+    // Message splitting logic remains the same
     const splitMessageIntoBlocks = (content: string) => {
-        // Split by double line breaks but preserve code blocks and lists
         const blocks: string[] = [];
         const lines = content.split('\n');
         let currentBlock = '';
@@ -122,12 +114,10 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         let isListBlock = false;
 
         lines.forEach((line, index) => {
-            // Check for code block start/end
             if (line.trim().startsWith('```')) {
                 isCodeBlock = !isCodeBlock;
                 currentBlock += line + '\n';
                 
-                // If closing a code block, start a new block
                 if (!isCodeBlock && currentBlock.trim() !== '') {
                     blocks.push(currentBlock.trimEnd());
                     currentBlock = '';
@@ -135,23 +125,19 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                 return;
             }
 
-            // Handle code block content
             if (isCodeBlock) {
                 currentBlock += line + '\n';
                 return;
             }
 
-            // Check for list items
             const isListItem = line.trim().match(/^[\d*+-]\s/);
             if (isListItem && !isListBlock) {
                 isListBlock = true;
             }
 
-            // If we're in a list block, continue adding list items
             if (isListBlock) {
                 currentBlock += line + '\n';
 
-                // Check if the next line is not a list item to end the list block
                 const nextLineIsNotListItem = 
                     index === lines.length - 1 || 
                     !lines[index + 1].trim().match(/^[\d*+-]\s/);
@@ -164,7 +150,6 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                 return;
             }
 
-            // Regular paragraph-like blocks
             if (line.trim() === '' && currentBlock.trim() !== '') {
                 blocks.push(currentBlock.trimEnd());
                 currentBlock = '';
@@ -173,7 +158,6 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
             }
         });
 
-        // Add any remaining content
         if (currentBlock.trim() !== '') {
             blocks.push(currentBlock.trimEnd());
         }
@@ -181,7 +165,6 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         return blocks.filter(block => block.trim() !== '');
     };
 
-    // Memoized processed messages
     const processedMessages = useMemo(() => {
         return messages.map(message => {
             if (message.role === 'assistant') {
@@ -194,6 +177,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         });
     }, [messages]);
 
+    // Scrolling logic remains the same
     const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
         const scrollContainer = scrollableContainerRef.current;
         if (scrollContainer) {
@@ -258,10 +242,10 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
 
     return (
         <div ref={chatAreaRef} className="h-full p-1 relative">
-            <div className="flex flex-col h-full border border-solid border-gray-700 rounded-lg bg-muted/50 shadow-lg overflow-hidden">
+            <div className="flex flex-col h-full border border-solid border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
                 <div
                     ref={scrollableContainerRef}
-                    className="flex-1 p-3 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800"
+                    className="flex-1 p-3 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
                 >
                     {processedMessages.length > 0 ? (
                         <div className="space-y-2">
@@ -289,17 +273,18 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                         </div>
                     ) : (
                         <div className="flex h-full items-center justify-center">
-                            <p className="text-gray-400 text-base">Ask questions to start learning</p>
+                            <p className="text-gray-500 text-base">Ask questions to start learning</p>
                         </div>
                     )}
                 </div>
 
-                <div className="p-2 border-t border-gray-700 bg-gray-800">
+                <div className="p-2 border-t border-gray-200 bg-gray-50">
                     <div className="flex gap-2">
                         <textarea
                             placeholder={initialText}
-                            className="flex-1 p-2 bg-gray-700 text-white text-sm placeholder-gray-400 border-none 
-                                     rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="flex-1 p-2 bg-white text-gray-900 text-sm placeholder-gray-400 
+                                     border border-gray-200 rounded-lg resize-none 
+                                     focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={inputValue}
                             onKeyDown={handleKeyDown}
                             onChange={(e) => setInputValue(e.target.value)}
@@ -307,7 +292,8 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                         />
                         <button
                             className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg 
-                                     hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                     hover:bg-blue-700 transition-colors disabled:opacity-50 
+                                     disabled:cursor-not-allowed"
                             onClick={onSubmit}
                             disabled={!inputValue.trim()}
                         >
@@ -319,6 +305,5 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         </div>
     );
 };
-
 
 export default ChatArea;

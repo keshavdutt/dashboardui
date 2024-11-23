@@ -205,34 +205,34 @@ const NoteArea = ({ copiedText }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 p-6">
+        <div className="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 h-full">
             <div className="max-w-5xl mx-auto relative">
-                <Card className="bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 shadow-2xl rounded-xl overflow-hidden">
+                <Card className="bg-white/80 backdrop-blur-sm border border-gray-200 shadow-lg rounded-xl overflow-hidden">
                     <CardContent className="p-0">
                         {copiedText?.length > 0 ? (
-                            <div className="flex flex-col h-[calc(100vh-3rem)]">
+                            <div className="flex flex-col h-[calc(100vh-5rem)]">
                                 {/* Title and Action Bar */}
-                                <div className="flex items-center justify-between p-4 border-b border-gray-700/50 bg-gray-800/60">
+                                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
                                     <input
                                         type="text"
                                         placeholder="Untitled Document"
-                                        className="text-2xl font-bold bg-transparent outline-none text-white flex-1 placeholder-gray-400 transition duration-300 focus:placeholder-gray-600"
+                                        className="text-2xl font-bold bg-transparent outline-none text-gray-900 flex-1 placeholder-gray-400 transition duration-300 focus:placeholder-gray-500"
                                         value={noteTitle}
                                         onChange={(e) => setNoteTitle(e.target.value)}
                                     />
 
-                                    <div className="flex space-x-4 text-gray-400">
+                                    <div className="flex space-x-4 text-gray-500">
                                         <button
                                             title="Save"
                                             onClick={() => setIsModalOpen(true)}
-                                            className="hover:text-white transition transform hover:scale-110"
+                                            className="hover:text-gray-900 transition transform hover:scale-110"
                                         >
                                             <Bookmark className="w-6 h-6" />
                                         </button>
                                         <button
                                             title="Download"
                                             onClick={downloadAsPdf}
-                                            className="hover:text-white transition transform hover:scale-110"
+                                            className="hover:text-gray-900 transition transform hover:scale-110"
                                         >
                                             <FileDown className="w-6 h-6" />
                                         </button>
@@ -244,18 +244,19 @@ const NoteArea = ({ copiedText }) => {
                                     ref={editorRef}
                                     className="flex-1 overflow-hidden relative"
                                     onMouseUp={handleTextSelection}
+                                    data-color-mode="light"
                                 >
                                     <MDEditor
                                         value={content}
                                         onChange={handleChange}
                                         preview="edit"
                                         height="100%"
-                                        style={{
-                                            width: '100%',
-                                            backgroundColor: 'transparent',
-                                            color: 'white',
-                                        }}
-                                        className="dark-editor h-full"
+                                    // style={{
+                                    //     width: '100%',
+                                    //     backgroundColor: 'transparent',
+                                    //     color: 'white',
+                                    // }}
+                                    // className="dark-editor h-full"
                                     />
 
                                     {/* Text Selection Toolbar */}
