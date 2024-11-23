@@ -14,6 +14,7 @@ import {
   Map,
   Menu,
   Notebook,
+  NotebookPen,
   NotebookText,
   PieChart,
   Settings2,
@@ -82,6 +83,11 @@ const data = {
     }
   ],
   projects: [
+    {
+      name: "Notebook",
+      url: "/notebook",
+      icon: NotebookPen,
+    },
     {
       name: "Workspace",
       url: "/workspace",

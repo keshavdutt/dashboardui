@@ -9,24 +9,24 @@ body {
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -44,25 +44,25 @@ body {
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -78,6 +78,7 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+
 
 .wmde-markdown ul {
   list-style-type: disc;
@@ -98,113 +99,6 @@ body {
 .w-md-editor ol {
   list-style-type: decimal;
   margin-left: 1.5rem;
-}
-
-/* Dark mode styles for react-md-editor toolbar */
-.dark-editor .w-md-editor-toolbar {
-  background-color: #333; /* Dark background for toolbar */
-  color: #fff; /* Light text for buttons */
-  border-bottom: 1px solid #444; /* Optional: subtle border */
-}
-
-.dark-editor .w-md-editor-toolbar-item {
-  color: #ccc; /* Default button color */
-}
-
-.dark-editor .w-md-editor-toolbar-item:hover {
-  color: #fff; /* Button hover color */
-  background-color: #444; /* Optional: hover background */
-}
-
-/* General editor content spacing */
-.w-md-editor-content {
-  line-height: 1.6; /* Adjust line spacing for better readability */
-  font-size: 1rem; /* Set default font size */
-  color: #fff; /* Light text color for dark mode */
-  /* background-color: #aaa; */
-}
-
-/* Headings */
-.w-md-editor-content h1 {
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 1.5rem 0 1rem; /* Space above and below */
-  line-height: 1.3;
-  color: #f0db4f; /* Example: Yellowish heading color */
-}
-
-.w-md-editor-content h2 {
-  font-size: 1.75rem;
-  font-weight: bold;
-  margin: 1.25rem 0 1rem;
-  line-height: 1.4;
-  color: #00aaff; /* Example: Bluish heading color */
-}
-
-.w-md-editor-content h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 1rem 0 0.75rem;
-  line-height: 1.4;
-  color: #f39c12; /* Example: Orange heading color */
-}
-
-/* Paragraphs */
-.w-md-editor-content p {
-  margin: 0.75rem 0; /* Space between paragraphs */
-  text-align: justify; /* Optional: Justify text for better alignment */
-}
-
-/* Lists */
-.w-md-editor-content ul {
-  list-style-type: disc; /* Bullet list style */
-  margin-left: 1.5rem;
-  margin-bottom: 1rem; /* Space below lists */
-}
-
-.w-md-editor-content ol {
-  list-style-type: decimal; /* Numbered list style */
-  margin-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-/* Blockquotes */
-.w-md-editor-content blockquote {
-  border-left: 4px solid #444; /* Dark left border */
-  padding-left: 1rem;
-  margin: 1rem 0;
-  color: #aaa; /* Lighter color for quotes */
-  font-style: italic;
-}
-
-/* Code blocks */
-.w-md-editor-content pre {
-  background-color: #1e1e1e; /* Dark background */
-  color: #dcdcdc; /* Light text */
-  padding: 1rem;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  overflow-x: auto; /* Horizontal scrolling for long lines */
-  margin: 1rem 0;
-}
-
-/* Inline code */
-.w-md-editor-content code {
-  /* background-color: #333; */
-  /* color: #e91e63; Highlighted inline code */
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
-  font-size: 0.9rem;
-}
-
-/* Links */
-.w-md-editor-content a {
-  color: #4caf50; /* Green links */
-  text-decoration: none;
-}
-
-.w-md-editor-content a:hover {
-  text-decoration: underline;
 }
 
 

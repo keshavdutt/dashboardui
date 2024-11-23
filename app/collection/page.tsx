@@ -176,28 +176,27 @@ export default function CollectionPage() {
                             </div>
 
                             {view === 'grid' ? (
-                                // Grid View - keeping your original card design
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     {filteredCollection.map((note) => (
                                         <div
                                             key={note.id}
-                                            className={`group relative flex flex-col rounded-lg border border-gray-800 ${note.color} p-4 hover:border-gray-700 hover:shadow-lg transition-all duration-200`}
+                                            className={`group relative flex flex-col rounded-lg border border-gray-200 bg-white ${note.color} p-4 hover:border-gray-300 hover:shadow-md transition-all duration-200`}
                                             onClick={() => handleEditNote(note.id)}
                                         >
                                             <div className="flex items-start gap-3 mb-3">
-                                                <File className="h-5 w-5 text-gray-400 flex-shrink-0 mt-1" />
+                                                <File className="h-5 w-5 text-gray-500 flex-shrink-0 mt-1" />
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="font-medium text-white truncate">
+                                                    <h3 className="font-medium text-gray-900 truncate">
                                                         {note.title}
                                                     </h3>
-                                                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                                                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-600">
                                                         <Clock className="h-3 w-3" />
                                                         <span>Edited {formatDate(note.lastEdited)}</span>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <p className="text-sm text-gray-400 line-clamp-2 mb-3">
+                                            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                                                 {note.content}
                                             </p>
 
@@ -205,7 +204,7 @@ export default function CollectionPage() {
                                                 {note.tags.map((tag, index) => (
                                                     <span
                                                         key={index}
-                                                        className="inline-flex items-center rounded-full bg-gray-800/50 px-2 py-1 text-xs text-gray-400"
+                                                        className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
                                                     >
                                                         {tag}
                                                     </span>
@@ -216,7 +215,7 @@ export default function CollectionPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                                                    className="h-7 w-7 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleEditNote(note.id);
@@ -227,7 +226,7 @@ export default function CollectionPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="h-7 w-7 p-0 text-gray-400 hover:text-red-500 hover:bg-gray-700"
+                                                    className="h-7 w-7 p-0 text-gray-500 hover:text-red-500 hover:bg-gray-100"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         // Handle delete
@@ -238,7 +237,7 @@ export default function CollectionPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                                                    className="h-7 w-7 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         // Handle more options
@@ -256,40 +255,40 @@ export default function CollectionPage() {
                                     {filteredCollection.map((note) => (
                                         <div
                                             key={note.id}
-                                            className="group flex items-center gap-4 rounded-lg border border-gray-800 bg-gray-800/50 p-4 hover:border-gray-700 hover:shadow-lg transition-all duration-200"
+                                            className="group flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 hover:border-gray-300 hover:shadow-md transition-all duration-200"
                                             onClick={() => handleEditNote(note.id)}
                                         >
-                                            <File className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                                            <File className="h-5 w-5 text-gray-500 flex-shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="font-medium text-white">{note.title}</h3>
-                                                <p className="text-sm text-gray-400 line-clamp-1">{note.content}</p>
+                                                <h3 className="font-medium text-gray-900">{note.title}</h3>
+                                                <p className="text-sm text-gray-600 line-clamp-1">{note.content}</p>
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <div className="flex flex-wrap gap-2">
                                                     {note.tags.map((tag, index) => (
                                                         <span
                                                             key={index}
-                                                            className="inline-flex items-center rounded-full bg-gray-800 px-2 py-1 text-xs text-gray-400"
+                                                            className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
                                                         >
                                                             {tag}
                                                         </span>
                                                     ))}
                                                 </div>
-                                                <div className="text-sm text-gray-400">
+                                                <div className="text-sm text-gray-500">
                                                     {formatDate(note.lastEdited)}
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                                                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                                                     >
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-gray-700"
+                                                        className="h-8 w-8 p-0 text-gray-500 hover:text-red-500 hover:bg-gray-100"
                                                     >
                                                         <Trash className="h-4 w-4" />
                                                     </Button>

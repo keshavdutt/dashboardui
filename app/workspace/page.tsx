@@ -27,6 +27,7 @@ import {
 import ChatArea from "@/components/chatArea";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import NotebookMarkdownEditor from "@/components/NotebookMarkdownEditor";
 
 const NoteArea = dynamic(() => import('@/components/noteArea'), { ssr: false });
 
@@ -264,6 +265,7 @@ export default function WorkspacePage() {
                     <div className={`flex-1 overflow-auto transition-all ${showChat ? 'mr-[600px]' : 'mr-0'}`}>
                         <div className="h-full p-2">
                             <NoteArea copiedText={copiedText} />
+                            {/* <NotebookMarkdownEditor /> */}
                         </div>
                     </div>
 
