@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
-import { SignIn, SignInButton, useAuth, useUser } from "@clerk/nextjs";
+import { SignIn, SignInButton, useAuth, UserButton, useUser } from "@clerk/nextjs";
 
 import {
     Breadcrumb,
@@ -28,6 +28,7 @@ import ChatArea from "@/components/chatArea";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import NotebookMarkdownEditor from "@/components/NotebookMarkdownEditor";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NoteArea = dynamic(() => import('@/components/noteArea'), { ssr: false });
 
@@ -49,19 +50,19 @@ export default function WorkspacePage() {
     const [copiedText, setCopiedText] = useState('');
 
 
-    // Show loading state while auth is being checked
-    if (!isLoaded) {
-        return <div className="flex items-center justify-center h-screen">Loading...</div>;
-    }
+    // // Show loading state while auth is being checked
+    // if (!isLoaded) {
+    //     return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    // }
 
-    // Show SignIn component if user is not authenticated
-    if (!userId) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <SignInButton />
-            </div>
-        );
-    }
+    // // Show SignIn component if user is not authenticated
+    // if (!userId) {
+    //     return (
+    //         <div className="flex items-center justify-center h-screen">
+    //             <SignInButton />
+    //         </div>
+    //     );
+    // }
 
 
 
@@ -197,6 +198,7 @@ export default function WorkspacePage() {
                                 )}
                                 Save
                             </Button>
+                            <ThemeToggle />
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -220,6 +222,8 @@ export default function WorkspacePage() {
                             >
                                 <Settings className="h-4 w-4" />
                             </Button>
+                            <Separator orientation="vertical" className="h-6" />
+                            <UserButton />
                             <Separator orientation="vertical" className="h-6" />
                             <Button
                                 variant="ghost"

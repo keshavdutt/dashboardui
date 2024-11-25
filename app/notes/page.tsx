@@ -1,7 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+
+import { ThemeToggle } from "@/components/theme-toggle";
+import { UserButton, useUser } from "@clerk/nextjs";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
+
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,65 +38,45 @@ import {
 import { Input } from '@/components/ui/input';
 
 export default function NotesPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("newest");
+  const { user } = useUser();
+
+
   const [view, setView] = React.useState('list');
-  const [searchQuery, setSearchQuery] = React.useState('');
 
-  const notes = [
-    {
-      id: 1,
-      title: "Data Structures",
-      content: "Advanced concepts in data structures and algorithms",
-      lastEdited: "2024-03-15T10:30:00",
-      category: "Computer Science",
-      tags: ["algorithms", "programming"],
-      color: "border-l-blue-500"
-    },
-    {
-      id: 2,
-      title: "Economic Inflation Analysis",
-      content: "Current trends and future predictions in global economics",
-      lastEdited: "2024-03-14T15:45:00",
-      category: "Economics",
-      tags: ["finance", "global"],
-      color: "bg-green-500/10",
-    },
-    {
-      id: 3,
-      title: "Team Meeting Notes",
-      content: "Project roadmap and milestone discussion",
-      lastEdited: "2024-03-13T09:15:00",
-      category: "Business",
-      tags: ["meetings", "planning"],
-      color: "border-l-purple-500"
-    }
-  ];
 
-  const handleCreateNote = () => {
-    window.location.href = '/dashboard';
-  };
 
-  const handleEditNote = (noteId) => {
-    window.location.href = `/dashboard?id=${noteId}`;
-  };
+  // Convex queries
+  const notes = useQuery(api.notes.getNotes);
+  // const deleteNote = useMutation(api.notes.deleteNote);
+  const getRecentNotes = useQuery(api.notes.getRecentNotes);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
 
-  const filteredCollection = notes.filter(note =>
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Handle note deletion
+  // const handleDeleteNote = async (noteId) => {
+  //   try {
+  //     await deleteNote({ noteId });
+  //     toast.success("Note deleted successfully!");
+  //   } catch (error) {
+  //     toast.error("Failed to delete note: " + error.message);
+  //   }
+  // };
 
+  // Filter and sort notes
+  const filteredNotes = notes?.filter(note =>
+    note.title.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const sortedNotes = [...filteredNotes].sort((a, b) => {
+    const dateA = new Date(a._creationTime).getTime();
+    const dateB = new Date(b._creationTime).getTime();
+    return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+  });
+
+  
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -116,14 +104,14 @@ export default function NotesPage() {
 
         {/* Main Content */}
         <main className="flex-1 p-8">
-          {notes.length > 0 ? (
+          {sortedNotes.length > 0 ? (
             <div className="space-y-6">
               {/* Page Header */}
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h1 className="text-2xl font-semibold tracking-tight">My Notes</h1>
                   <p className="text-sm text-muted-foreground">
-                    {filteredCollection.length} notes in total
+                    {sortedNotes.length} notes in total
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -146,7 +134,7 @@ export default function NotesPage() {
                     </Button>
                   </div>
                   <Button
-                    onClick={handleCreateNote}
+                    // onClick={handleCreateNote}
                     className="flex items-center gap-2"
                   >
                     <FilePenLine className="h-4 w-4" />
@@ -180,11 +168,11 @@ export default function NotesPage() {
 
               {view === 'grid' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredCollection.map((note) => (
+                  {sortedNotes.map((note) => (
                     <div
-                      key={note.id}
-                      className={`group relative flex flex-col rounded-lg border border-gray-200 bg-white ${note.color} p-4 hover:border-gray-300 hover:shadow-md transition-all duration-200`}
-                      onClick={() => handleEditNote(note.id)}
+                      key=""
+                      className={`group relative flex flex-col rounded-lg border border-gray-200 bg-background  p-4 hover:border-gray-300 hover:shadow-md transition-all duration-200`}
+                      // onClick={() => handleEditNote(note.id)}
                     >
                       <div className="flex items-start gap-3 mb-3">
                         <File className="h-5 w-5 text-gray-500 flex-shrink-0 mt-1" />
@@ -194,24 +182,24 @@ export default function NotesPage() {
                           </h3>
                           <div className="flex items-center gap-2 mt-1 text-xs text-gray-600">
                             <Clock className="h-3 w-3" />
-                            <span>Edited {formatDate(note.lastEdited)}</span>
+                            {/* <span>Edited {formatDate(note.lastEdited)}</span> */}
                           </div>
                         </div>
                       </div>
 
-                      <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                      {/* <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                         {note.content}
-                      </p>
+                      </p> */}
 
                       <div className="flex flex-wrap gap-2 mt-auto">
-                        {note.tags.map((tag, index) => (
+                        {/* {note.tags.map((tag, index) => (
                           <span
                             key={index}
                             className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
                           >
                             {tag}
                           </span>
-                        ))}
+                        ))} */}
                       </div>
 
                       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -221,7 +209,7 @@ export default function NotesPage() {
                           className="h-7 w-7 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEditNote(note.id);
+                            // handleEditNote(note.id);
                           }}
                         >
                           <Edit className="h-4 w-4" />
@@ -255,30 +243,30 @@ export default function NotesPage() {
               ) : (
                 // List View - keeping your original list design
                 <div className="space-y-2">
-                  {filteredCollection.map((note) => (
+                  {sortedNotes.map((note) => (
                     <div
-                      key={note.id}
+                      key=""
                       className="group flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 hover:border-gray-300 hover:shadow-md transition-all duration-200"
-                      onClick={() => handleEditNote(note.id)}
+                      // onClick={() => handleEditNote(note.id)}
                     >
                       <File className="h-5 w-5 text-gray-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900">{note.title}</h3>
-                        <p className="text-sm text-gray-600 line-clamp-1">{note.content}</p>
+                        {/* <p className="text-sm text-gray-600 line-clamp-1">{note.content}</p> */}
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="flex flex-wrap gap-2">
-                          {note.tags.map((tag, index) => (
+                          {/* {note.tags.map((tag, index) => (
                             <span
                               key={index}
                               className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
                             >
                               {tag}
                             </span>
-                          ))}
+                          ))} */}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {formatDate(note.lastEdited)}
+                          {/* {formatDate(note.lastEdited)} */}
                         </div>
                         <div className="flex items-center gap-1">
                           <Button
@@ -313,7 +301,9 @@ export default function NotesPage() {
                 <p className="mb-6 text-sm text-muted-foreground">
                   Create your first collection to get started with organizing your documents.
                 </p>
-                <Button onClick={handleCreateNote} className="w-full">
+                <Button 
+                // onClick={handleCreateNote} 
+                className="w-full">
                   Create New Collection
                 </Button>
               </div>

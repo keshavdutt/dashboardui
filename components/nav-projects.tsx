@@ -48,7 +48,7 @@ export function NavProjects({
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url} className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors duration-300 ease-in-out   ${pathname === item.url
-                  ? "bg-primary text-white" // Active styles
+                  ? "bg-secondary" // Active styles
                   : "text-muted-foreground hover:bg-muted/50" // Inactive styles
                 }`}>
                 <item.icon />

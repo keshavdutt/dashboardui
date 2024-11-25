@@ -12,6 +12,13 @@ import jsPDF from 'jspdf';
 import MarkdownPreview from "@uiw/react-markdown-preview";
 import remarkHtml from 'remark-html';
 import remarkParse from 'remark-parse';
+import { useTheme } from 'next-themes';
+
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
+import { slugify } from "@/lib/utils";
+
 
 
 
@@ -29,6 +36,10 @@ const TextSelectionToolbar = ({
     const [position, setPosition] = useState({ top: 0, left: 0 });
 
     const mdEditorRef = useRef(null);
+    const { resolvedTheme } = useTheme();
+
+
+
 
 
     useEffect(() => {
@@ -63,11 +74,10 @@ const TextSelectionToolbar = ({
 
     if (!selectedText) return null;
 
-
     return (
         <div
             ref={toolbarRef}
-            className="absolute z-50 bg-white text-black rounded-xl shadow-lg flex items-center  space-x-1"
+            className={`absolute z-50 ${resolvedTheme === 'dark' ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'} rounded-xl shadow-lg flex items-center space-x-1`}
             style={{
                 top: `${position.top}px`,
                 left: `${position.left}px`,
@@ -75,21 +85,21 @@ const TextSelectionToolbar = ({
             }}
         >
             <button
-                className="flex-1 text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition flex items-center justify-center space-x-1 group"
+                className={`flex-1 ${resolvedTheme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'} p-2 rounded-lg transition flex items-center justify-center space-x-1 group`}
                 onClick={() => onExplain(selectedText)}
                 title="Explain"
             >
-                <SparklesIcon className="w-3 h-3 text-gray-600 group-hover:text-black transition" />
-                <span className="text-xs group-hover:text-black transition hidden md:inline">Explain</span>
+                <SparklesIcon className={`w-3 h-3 ${resolvedTheme === 'dark' ? 'text-gray-400 group-hover:text-gray-100' : 'text-gray-600 group-hover:text-black'} transition`} />
+                <span className="text-xs group-hover:text-current transition hidden md:inline">Explain</span>
             </button>
-            <div className="h-3 w-px bg-gray-300 mx-1"></div>
+            <div className={`h-3 w-px ${resolvedTheme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'} mx-1`}></div>
             <button
-                className="flex-1 text-gray-700 hover:bg-gray-100 p-2 rounded-lg transition flex items-center justify-center space-x-1 group"
+                className={`flex-1 ${resolvedTheme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'} p-2 rounded-lg transition flex items-center justify-center space-x-1 group`}
                 onClick={() => onImprove(selectedText)}
                 title="Improve"
             >
-                <RefreshCcw className="w-3 h-3 text-gray-600 group-hover:text-black transition" />
-                <span className="text-xs group-hover:text-black transition hidden md:inline">Improve</span>
+                <RefreshCcw className={`w-3 h-3 ${resolvedTheme === 'dark' ? 'text-gray-400 group-hover:text-gray-100' : 'text-gray-600 group-hover:text-black'} transition`} />
+                <span className="text-xs group-hover:text-current transition hidden md:inline">Improve</span>
             </button>
         </div>
     );
@@ -102,6 +112,16 @@ const NoteArea = ({ copiedText }) => {
     const [savedNotes, setSavedNotes] = useState([]);
     const [selectedText, setSelectedText] = useState('');
     const editorRef = useRef(null);
+
+    const [currentNoteId, setCurrentNoteId] = useState(null);
+
+
+    // Convex mutations and queries
+    const createNote = useMutation(api.notes.createNote);
+    const updateNote = useMutation(api.notes.updateNote);
+
+    const { setTheme, resolvedTheme } = useTheme()
+
 
     const handleChange = useCallback((value) => {
         setContent(value || '');
@@ -197,6 +217,36 @@ const NoteArea = ({ copiedText }) => {
         setNoteTitle('');
     }, [noteTitle, content]);
 
+    const handleSave = async () => {
+        if (!noteTitle.trim()) {
+            toast.error("Please enter a document title");
+            return;
+        }
+        try {
+            const slug = slugify(noteTitle);
+            if (currentNoteId) {
+                // Update existing note
+                await updateNote({
+                    noteId: currentNoteId,
+                    title: noteTitle,
+                    content: content,
+                });
+                toast.success("Note updated successfully!");
+            } else {
+                // Create new note
+                const newNoteSlug = await createNote({
+                    title: noteTitle,
+                    content: content,
+                    slug,
+                });
+                setCurrentNoteId(newNoteSlug);
+                toast.success("Note created successfully!");
+            }
+        } catch (error) {
+            toast.error("Failed to save note: " + error.message);
+        }
+    };
+
     const handleSaveNote = () => {
         if (!noteTitle.trim()) {
             setNoteTitle('Untitled');
@@ -205,62 +255,53 @@ const NoteArea = ({ copiedText }) => {
     };
 
     return (
-        <div className="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 h-full">
+        <div className="h-full">
             <div className="max-w-5xl mx-auto relative">
-                <Card className="bg-white/80 backdrop-blur-sm border border-gray-200 shadow-lg rounded-xl overflow-hidden">
+                <Card className="bg-background/80 backdrop-blur-sm border shadow-lg rounded-xl overflow-hidden">
                     <CardContent className="p-0">
                         {copiedText?.length > 0 ? (
                             <div className="flex flex-col h-[calc(100vh-5rem)]">
-                                {/* Title and Action Bar */}
-                                <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+                                <div className={`flex items-center justify-between p-4 border-b ${resolvedTheme === 'dark' ? 'bg-gray-900/50' : 'bg-white/50'}`}>
                                     <input
                                         type="text"
                                         placeholder="Untitled Document"
-                                        className="text-2xl font-bold bg-transparent outline-none text-gray-900 flex-1 placeholder-gray-400 transition duration-300 focus:placeholder-gray-500"
+                                        className={`text-2xl font-bold bg-transparent outline-none flex-1 transition duration-300 focus:placeholder-gray-500 ${resolvedTheme === 'dark' ? 'text-gray-100 placeholder-gray-500' : 'text-gray-900 placeholder-gray-400'}`}
                                         value={noteTitle}
                                         onChange={(e) => setNoteTitle(e.target.value)}
                                     />
 
-                                    <div className="flex space-x-4 text-gray-500">
+                                    <div className="flex space-x-4 text-muted-foreground">
                                         <button
                                             title="Save"
-                                            onClick={() => setIsModalOpen(true)}
-                                            className="hover:text-gray-900 transition transform hover:scale-110"
+                                            onClick={handleSave}
+                                            className="hover:text-foreground transition transform hover:scale-110"
                                         >
                                             <Bookmark className="w-6 h-6" />
                                         </button>
                                         <button
                                             title="Download"
                                             onClick={downloadAsPdf}
-                                            className="hover:text-gray-900 transition transform hover:scale-110"
+                                            className="hover:text-foreground transition transform hover:scale-110"
                                         >
                                             <FileDown className="w-6 h-6" />
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* Editor Area */}
                                 <div
                                     ref={editorRef}
                                     className="flex-1 overflow-hidden relative"
                                     onMouseUp={handleTextSelection}
-                                    data-color-mode="light"
+                                    data-color-mode={resolvedTheme}
                                 >
                                     <MDEditor
                                         value={content}
                                         onChange={handleChange}
                                         preview="edit"
                                         height="100%"
-                                    // style={{
-                                    //     width: '100%',
-                                    //     backgroundColor: 'transparent',
-                                    //     color: 'white',
-                                    // }}
-                                    // className="dark-editor h-full"
-                                    visibleDragbar={false}
+                                        visibleDragbar={false}
                                     />
 
-                                    {/* Text Selection Toolbar */}
                                     <TextSelectionToolbar
                                         selectedText={selectedText}
                                         editorRef={editorRef}
@@ -272,27 +313,26 @@ const NoteArea = ({ copiedText }) => {
                             </div>
                         ) : (
                             <div className="h-[calc(100vh-3rem)] flex items-center justify-center">
-                            <div className="text-center p-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                                <p className="text-gray-500 text-lg">
-                                    Notes will appear here once you start adding content.
-                                    <br />
-                                    Select text and click send to notes, or start a new note.
-                                </p>
+                                <div className="text-center p-8 bg-background/50 rounded-xl border-2 border-dashed">
+                                    <p className="text-lg text-muted-foreground">
+                                        Notes will appear here once you start adding content.
+                                        <br />
+                                        Select text and click send to notes, or start a new note.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Save Note Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="bg-gray-800 border-gray-700 text-white">
+                <DialogContent className="bg-background border-border">
                     <DialogHeader className="relative">
-                        <DialogTitle className="text-white">Save Note</DialogTitle>
+                        <DialogTitle>Save Note</DialogTitle>
                         <button
                             onClick={() => setIsModalOpen(false)}
-                            className="absolute top-0 right-0 text-gray-400 hover:text-white transition"
+                            className="absolute top-0 right-0 text-muted-foreground hover:text-foreground transition"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -302,19 +342,17 @@ const NoteArea = ({ copiedText }) => {
                             placeholder="Note Title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
+                            className="bg-background border-input"
                         />
                         <div className="flex justify-end gap-2">
                             <Button
                                 variant="outline"
                                 onClick={() => setIsModalOpen(false)}
-                                className="bg-transparent border-gray-600 text-white hover:bg-gray-700"
                             >
                                 Cancel
                             </Button>
                             <Button
                                 onClick={handleSaveNote}
-                                className="bg-blue-600 text-white hover:bg-blue-700"
                             >
                                 Save
                             </Button>

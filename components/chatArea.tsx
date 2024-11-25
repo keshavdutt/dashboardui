@@ -15,7 +15,6 @@ interface ChatAreaProps {
     setCopiedText: (text: string) => void;
 }
 
-// Block component for rendering individual blocks with hover actions
 const BlockWithActions = React.memo(({ 
     content, 
     onCopy, 
@@ -49,21 +48,22 @@ const BlockWithActions = React.memo(({
         <div 
             ref={blockRef}
             className={`relative group transition-colors duration-200 
-                        ${isHovered ? 'bg-gray-100' : 'bg-transparent'}
+                        ${isHovered ? 'dark:bg-gray-800 bg-gray-100' : 'bg-transparent'}
                         ${className}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="prose prose-sm max-w-none overflow-x-auto
-                           prose-headings:text-gray-900 prose-h1:text-xl prose-h2:text-lg
-                           prose-p:text-gray-700 prose-p:text-sm leading-relaxed
-                           prose-strong:text-gray-900
-                           prose-code:text-gray-800 prose-code:text-sm
-                           prose-pre:bg-gray-100 prose-pre:text-sm
-                           prose-a:text-blue-600
-                           prose-blockquote:text-gray-600 prose-blockquote:text-sm
-                           prose-blockquote:border-gray-300
-                           prose-li:text-sm prose-li:text-gray-700
+            <div className="prose prose-sm dark:prose-invert max-w-none overflow-x-auto
+                           prose-headings:dark:text-gray-100 prose-headings:text-gray-900 
+                           prose-h1:text-xl prose-h2:text-lg
+                           prose-p:dark:text-gray-300 prose-p:text-gray-700 prose-p:text-sm leading-relaxed
+                           prose-strong:dark:text-gray-100 prose-strong:text-gray-900
+                           prose-code:dark:text-gray-200 prose-code:text-gray-800 prose-code:text-sm
+                           prose-pre:dark:bg-gray-800 prose-pre:bg-gray-100 prose-pre:text-sm
+                           prose-a:text-blue-600 dark:prose-a:text-blue-400
+                           prose-blockquote:dark:text-gray-400 prose-blockquote:text-gray-600 prose-blockquote:text-sm
+                           prose-blockquote:border-gray-300 dark:prose-blockquote:border-gray-700
+                           prose-li:text-sm prose-li:dark:text-gray-300 prose-li:text-gray-700
                            relative">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {content}
@@ -76,14 +76,18 @@ const BlockWithActions = React.memo(({
                             pointer-events-none group-hover:pointer-events-auto`}>
                 <button 
                     onClick={handleCopy}
-                    className="p-1 bg-gray-200/80 text-gray-600 hover:text-gray-900 
+                    className="p-1 dark:bg-gray-700/80 bg-gray-200/80 
+                             dark:text-gray-300 text-gray-600 
+                             dark:hover:text-gray-100 hover:text-gray-900 
                              rounded-md transition-colors"
                     title="Copy block"
                 >
                     <Copy size={14} />
                 </button>
                 <button 
-                    className="p-1 bg-gray-200/80 text-gray-600 hover:text-gray-900 
+                    className="p-1 dark:bg-gray-700/80 bg-gray-200/80 
+                             dark:text-gray-300 text-gray-600 
+                             dark:hover:text-gray-100 hover:text-gray-900 
                              rounded-md transition-colors"
                     title="More options"
                 >
@@ -105,8 +109,9 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
     const [inputValue, setInputValue] = useState("");
     const [initialText, setInitialText] = useState('Ask Something');
 
-    // Message splitting logic remains the same
+    // Original message splitting logic and other functions remain unchanged
     const splitMessageIntoBlocks = (content: string) => {
+        // ... (keeping original implementation)
         const blocks: string[] = [];
         const lines = content.split('\n');
         let currentBlock = '';
@@ -177,7 +182,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
         });
     }, [messages]);
 
-    // Scrolling logic remains the same
+    // Original scrolling logic and other functions remain unchanged
     const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
         const scrollContainer = scrollableContainerRef.current;
         if (scrollContainer) {
@@ -242,10 +247,10 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
 
     return (
         <div ref={chatAreaRef} className="h-full p-1 relative">
-            <div className="flex flex-col h-full border border-solid border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+            <div className="flex flex-col h-full border border-solid dark:border-gray-700 border-gray-200 rounded-lg bg-background dark:bg-gray-900 shadow-sm overflow-hidden">
                 <div
                     ref={scrollableContainerRef}
-                    className="flex-1 p-3 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+                    className="flex-1 p-3 overflow-y-auto overflow-x-hidden scrollbar-thin dark:scrollbar-thumb-gray-700 scrollbar-thumb-gray-300 dark:scrollbar-track-gray-800 scrollbar-track-gray-100"
                 >
                     {processedMessages.length > 0 ? (
                         <div className="space-y-2">
@@ -263,7 +268,7 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                                     </div>
                                 ) : (
                                     <div key={index} className="flex justify-end">
-                                        <p className="max-w-[80%] rounded-lg bg-blue-600 p-2 break-words text-white text-sm">
+                                        <p className="max-w-[80%] rounded-lg bg-blue-600 dark:bg-blue-700 p-2 break-words text-sm text-white">
                                             {message.content}
                                         </p>
                                     </div>
@@ -273,17 +278,20 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                         </div>
                     ) : (
                         <div className="flex h-full items-center justify-center">
-                            <p className="text-gray-500 text-base">Ask questions to start learning</p>
+                            <p className="dark:text-gray-400 text-gray-500 text-base">Ask questions to start learning</p>
                         </div>
                     )}
                 </div>
 
-                <div className="p-2 border-t border-gray-200 bg-gray-50">
+                <div className="p-2 border-t dark:border-gray-700 border-gray-200 dark:bg-gray-800 bg-gray-50">
                     <div className="flex gap-2">
                         <textarea
                             placeholder={initialText}
-                            className="flex-1 p-2 bg-white text-gray-900 text-sm placeholder-gray-400 
-                                     border border-gray-200 rounded-lg resize-none 
+                            className="flex-1 p-2 dark:bg-gray-900 bg-background 
+                                     dark:text-gray-100 text-gray-900 text-sm 
+                                     dark:placeholder-gray-500 placeholder-gray-400 
+                                     dark:border-gray-700 border-gray-200 
+                                     rounded-lg resize-none 
                                      focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={inputValue}
                             onKeyDown={handleKeyDown}
@@ -291,9 +299,10 @@ const ChatArea = ({ handleChat, messages, setMessages, setCopiedText }: ChatArea
                             rows={1}
                         />
                         <button
-                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg 
-                                     hover:bg-blue-700 transition-colors disabled:opacity-50 
-                                     disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-sm font-medium 
+                                     text-white rounded-lg 
+                                     hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors 
+                                     disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={onSubmit}
                             disabled={!inputValue.trim()}
                         >
