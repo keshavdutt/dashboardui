@@ -68,6 +68,30 @@
   }
 }
 
+.wmde-markdown ul {
+  list-style-type: disc;
+  padding-left: 1rem;
+}
+
+.wmde-markdown ol {
+  list-style-type: decimal;
+  padding-left: 1rem;
+}
+
+
+.w-md-editor ul {
+  list-style-type: disc;
+  margin-left: 1rem;
+}
+
+.w-md-editor ol {
+  list-style-type: decimal;
+  margin-left: 1rem;
+}
+
+
+
+
 pre {
   background: #0d0d0d;
   border-radius: 0.5rem;
