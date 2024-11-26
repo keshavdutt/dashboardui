@@ -94,7 +94,7 @@ const NoteArea = ({
     initialTitle = '', 
     copiedText, 
     selectedNote,
-    onNoteCreated, // Optional callback when note is created/updated
+    // onNoteCreated, // Optional callback when note is created/updated
 }) => {
     const [content, setContent] = useState(initialContent);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -183,14 +183,14 @@ const NoteArea = ({
             }
 
             // Call the optional callback if provided
-            if (onNoteCreated) {
-                onNoteCreated({
-                    id: currentNoteId || result,
-                    title: noteTitle,
-                    content: content,
-                    slug
-                });
-            }
+            // if (onNoteCreated) {
+            //     onNoteCreated({
+            //         id: currentNoteId || result,
+            //         title: noteTitle,
+            //         content: content,
+            //         slug
+            //     });
+            // }
         } catch (error) {
             toast.error("Failed to save note: " + error.message);
         }
