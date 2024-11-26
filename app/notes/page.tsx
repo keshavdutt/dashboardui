@@ -37,6 +37,8 @@ import {
 } from "lucide-react";
 import { Input } from '@/components/ui/input';
 
+import { useRouter } from "next/navigation";
+
 export default function NotesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,9 +49,18 @@ export default function NotesPage() {
   const [view, setView] = React.useState('list');
 
 
+  // Inside your NotesPage function
+  const router = useRouter();
+
+  // Navigate to Workspace with noteId in the URL
+  // Navigate to Workspace with note data in state
+  const handleNoteClick = (note) => {
+    router.push(`/workspace?slug=${note.slug}`);
+  };
 
   // Convex queries
   const notes = useQuery(api.notes.getNotes);
+  // console.log('These are the notes', notes)
   // const deleteNote = useMutation(api.notes.deleteNote);
   const getRecentNotes = useQuery(api.notes.getRecentNotes);
 
@@ -76,7 +87,7 @@ export default function NotesPage() {
     return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
   });
 
-  
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -172,7 +183,7 @@ export default function NotesPage() {
                     <div
                       key=""
                       className={`group relative flex flex-col rounded-lg border border-gray-200 bg-background  p-4 hover:border-gray-300 hover:shadow-md transition-all duration-200`}
-                      // onClick={() => handleEditNote(note.id)}
+                      onClick={() => handleNoteClick(note._id)}
                     >
                       <div className="flex items-start gap-3 mb-3">
                         <File className="h-5 w-5 text-gray-500 flex-shrink-0 mt-1" />
@@ -247,7 +258,7 @@ export default function NotesPage() {
                     <div
                       key=""
                       className="group flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 hover:border-gray-300 hover:shadow-md transition-all duration-200"
-                      // onClick={() => handleEditNote(note.id)}
+                      onClick={() => handleNoteClick(note)}
                     >
                       <File className="h-5 w-5 text-gray-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -301,9 +312,9 @@ export default function NotesPage() {
                 <p className="mb-6 text-sm text-muted-foreground">
                   Create your first collection to get started with organizing your documents.
                 </p>
-                <Button 
-                // onClick={handleCreateNote} 
-                className="w-full">
+                <Button
+                  // onClick={handleCreateNote} 
+                  className="w-full">
                   Create New Collection
                 </Button>
               </div>

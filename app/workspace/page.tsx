@@ -26,9 +26,17 @@ import {
 
 import ChatArea from "@/components/chatArea";
 import dynamic from "next/dynamic";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import NotebookMarkdownEditor from "@/components/NotebookMarkdownEditor";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { api } from '@/convex/_generated/api';
+
+
+
+import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+
 
 const NoteArea = dynamic(() => import('@/components/noteArea'), { ssr: false });
 
@@ -50,19 +58,18 @@ export default function WorkspacePage() {
     const [copiedText, setCopiedText] = useState('');
 
 
-    // // Show loading state while auth is being checked
-    // if (!isLoaded) {
-    //     return <div className="flex items-center justify-center h-screen">Loading...</div>;
-    // }
+    // const { noteId } = useParams();
 
-    // // Show SignIn component if user is not authenticated
-    // if (!userId) {
-    //     return (
-    //         <div className="flex items-center justify-center h-screen">
-    //             <SignInButton />
-    //         </div>
-    //     );
-    // }
+    const searchParams = useSearchParams();
+    const slug = searchParams.get('slug');
+
+
+    // Use Convex useQuery hook to fetch the note
+    const note = useQuery(api.notes.getNotesBySlug,
+        slug ? { slug } : 'skip'
+    );
+
+    console.log('This is the incoming note id', slug, 'asdsad', note)
 
 
 
@@ -268,8 +275,11 @@ export default function WorkspacePage() {
                     {/* Note Area */}
                     <div className={`flex-1 overflow-auto transition-all ${showChat ? 'mr-[600px]' : 'mr-0'}`}>
                         <div className="h-full p-2">
-                            <NoteArea copiedText={copiedText} />
-                            {/* <NotebookMarkdownEditor /> */}
+                            <NoteArea 
+                            selectedNote={note}
+                            copiedText={copiedText} 
+                            initialContent={note?.content}
+                            initialTitle={note?.title} />
                         </div>
                     </div>
 

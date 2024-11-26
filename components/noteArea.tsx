@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { unified } from 'unified';
 
@@ -19,9 +18,6 @@ import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 import { slugify } from "@/lib/utils";
 
-
-
-
 // Dynamically import the markdown editor to reduce initial bundle size
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
 
@@ -34,13 +30,7 @@ const TextSelectionToolbar = ({
 }) => {
     const toolbarRef = useRef(null);
     const [position, setPosition] = useState({ top: 0, left: 0 });
-
-    const mdEditorRef = useRef(null);
     const { resolvedTheme } = useTheme();
-
-
-
-
 
     useEffect(() => {
         const calculatePosition = () => {
@@ -53,18 +43,12 @@ const TextSelectionToolbar = ({
             const rect = range.getBoundingClientRect();
             const editorRect = editorRef.current.getBoundingClientRect();
 
-            // Calculate positions
             const top = rect.bottom - editorRect.top + 10;
             let left = rect.left - editorRect.left;
-
-            // Ensure toolbar stays within editor bounds
-            const toolbarWidth = 250; // Estimated toolbar width
+            const toolbarWidth = 250;
             left = Math.max(0, Math.min(left, editorRect.width - toolbarWidth));
 
-            setPosition({
-                top,
-                left
-            });
+            setPosition({ top, left });
         };
 
         if (selectedText) {
@@ -105,27 +89,42 @@ const TextSelectionToolbar = ({
     );
 };
 
-const NoteArea = ({ copiedText }) => {
-    const [content, setContent] = useState('');
+const NoteArea = ({ 
+    initialContent = '', 
+    initialTitle = '', 
+    copiedText, 
+    selectedNote,
+    onNoteCreated, // Optional callback when note is created/updated
+}) => {
+    const [content, setContent] = useState(initialContent);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [noteTitle, setNoteTitle] = useState('');
+    const [noteTitle, setNoteTitle] = useState(initialTitle);
     const [savedNotes, setSavedNotes] = useState([]);
     const [selectedText, setSelectedText] = useState('');
     const editorRef = useRef(null);
-
     const [currentNoteId, setCurrentNoteId] = useState(null);
 
-
-    // Convex mutations and queries
     const createNote = useMutation(api.notes.createNote);
     const updateNote = useMutation(api.notes.updateNote);
-
-    const { setTheme, resolvedTheme } = useTheme()
-
+    const { setTheme, resolvedTheme } = useTheme();
 
     const handleChange = useCallback((value) => {
         setContent(value || '');
     }, []);
+
+    useEffect(() => {
+        // Update content if initialContent changes from parent
+        if (initialContent) {
+            setContent(initialContent);
+        }
+    }, [initialContent]);
+
+    useEffect(() => {
+        // Update title if initialTitle changes from parent
+        if (initialTitle) {
+            setNoteTitle(initialTitle);
+        }
+    }, [initialTitle]);
 
     useEffect(() => {
         if (copiedText) {
@@ -134,88 +133,28 @@ const NoteArea = ({ copiedText }) => {
         }
     }, [copiedText]);
 
-    // Load saved notes on component mount
     useEffect(() => {
         const existingNotes = JSON.parse(localStorage.getItem('savedNotes')) || [];
         setSavedNotes(existingNotes);
     }, []);
+
+    useEffect(() => {
+        if (selectedNote) {
+            loadNote(selectedNote);
+        }
+    }, [selectedNote]);
+
+    const loadNote = (note) => {
+        setNoteTitle(note.title);
+        setContent(note.content);
+        setCurrentNoteId(note._id || null);
+    };
 
     const handleTextSelection = useCallback((event) => {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
         setSelectedText(selectedText);
     }, []);
-
-    const handleExplain = useCallback((text) => {
-        // Placeholder for explanation logic
-        console.log('Explaining:', text);
-        // You would typically implement an API call or AI service here
-        alert('Explanation feature coming soon!');
-    }, []);
-
-    const handleImprove = useCallback((text) => {
-        // Placeholder for improvement logic
-        console.log('Improving:', text);
-        // You would typically implement an API call or AI service here
-        alert('Improvement feature coming soon!');
-    }, []);
-
-    const handleCopyText = useCallback((text) => {
-        navigator.clipboard.writeText(text);
-        alert('Text copied to clipboard!');
-    }, []);
-
-    const downloadAsPdf = useCallback(() => {
-        const doc = new jsPDF();
-        doc.setFontSize(12);
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const pageWidth = doc.internal.pageSize.getWidth();
-
-        // Convert markdown to HTML
-        const htmlContent = unified()
-            .use(remarkParse)
-            .use(remarkHtml)
-            .processSync(content)
-            .toString();
-
-        // Create temporary div and set HTML content
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
-        const textContent = tempDiv.textContent || tempDiv.innerText;
-
-
-
-        // Split text into lines
-        const lines = doc.splitTextToSize(textContent, pageWidth - 40);
-
-        let y = 20;
-        lines.forEach((line) => {
-            if (y + 12 > pageHeight) {
-                y = 20;
-                doc.addPage();
-            }
-            doc.text(line, 20, y);
-            y += 12;
-        });
-
-        doc.save(noteTitle ? `${noteTitle}.pdf` : 'markdown-note.pdf');
-    }, [content, noteTitle]);
-
-    const saveToLocalStorage = useCallback(() => {
-        const existingNotes = JSON.parse(localStorage.getItem('savedNotes')) || [];
-        const noteIndex = existingNotes.findIndex(note => note.title === noteTitle);
-
-        if (noteIndex > -1) {
-            existingNotes[noteIndex].content = content;
-        } else {
-            existingNotes.push({ title: noteTitle || 'Untitled', content });
-        }
-
-        localStorage.setItem('savedNotes', JSON.stringify(existingNotes));
-        setSavedNotes(existingNotes);
-        setIsModalOpen(false);
-        setNoteTitle('');
-    }, [noteTitle, content]);
 
     const handleSave = async () => {
         if (!noteTitle.trim()) {
@@ -224,34 +163,62 @@ const NoteArea = ({ copiedText }) => {
         }
         try {
             const slug = slugify(noteTitle);
+            let result;
+            console.log('Current noet id', currentNoteId)
             if (currentNoteId) {
-                // Update existing note
-                await updateNote({
+                result = await updateNote({
                     noteId: currentNoteId,
                     title: noteTitle,
                     content: content,
                 });
                 toast.success("Note updated successfully!");
             } else {
-                // Create new note
-                const newNoteSlug = await createNote({
+                result = await createNote({
                     title: noteTitle,
                     content: content,
                     slug,
                 });
-                setCurrentNoteId(newNoteSlug);
+                setCurrentNoteId(result);
                 toast.success("Note created successfully!");
+            }
+
+            // Call the optional callback if provided
+            if (onNoteCreated) {
+                onNoteCreated({
+                    id: currentNoteId || result,
+                    title: noteTitle,
+                    content: content,
+                    slug
+                });
             }
         } catch (error) {
             toast.error("Failed to save note: " + error.message);
         }
     };
 
-    const handleSaveNote = () => {
-        if (!noteTitle.trim()) {
-            setNoteTitle('Untitled');
-        }
-        saveToLocalStorage();
+    // Placeholder functions - you'll need to implement these based on your app's requirements
+    const handleExplain = (text) => {
+        // Implement explanation logic
+        toast.info("Explaining: " + text);
+    };
+
+    const handleImprove = (text) => {
+        // Implement improvement logic
+        toast.info("Improving: " + text);
+    };
+
+    const handleCopyText = (text) => {
+        // Implement copy logic
+        navigator.clipboard.writeText(text);
+        toast.success("Text copied!");
+    };
+
+    const downloadAsPdf = () => {
+        // Implement PDF download logic
+        const doc = new jsPDF();
+        doc.text(noteTitle, 10, 10);
+        doc.text(content, 10, 20);
+        doc.save(`${noteTitle || 'untitled'}.pdf`);
     };
 
     return (
@@ -259,7 +226,7 @@ const NoteArea = ({ copiedText }) => {
             <div className="max-w-5xl mx-auto relative">
                 <Card className="bg-background/80 backdrop-blur-sm border shadow-lg rounded-xl overflow-hidden">
                     <CardContent className="p-0">
-                        {copiedText?.length > 0 ? (
+                        {(content.length > 0 || initialContent) ? (
                             <div className="flex flex-col h-[calc(100vh-5rem)]">
                                 <div className={`flex items-center justify-between p-4 border-b ${resolvedTheme === 'dark' ? 'bg-gray-900/50' : 'bg-white/50'}`}>
                                     <input
@@ -297,7 +264,7 @@ const NoteArea = ({ copiedText }) => {
                                     <MDEditor
                                         value={content}
                                         onChange={handleChange}
-                                        preview="edit"
+                                        preview="preview"
                                         height="100%"
                                         visibleDragbar={false}
                                     />
@@ -314,52 +281,22 @@ const NoteArea = ({ copiedText }) => {
                         ) : (
                             <div className="h-[calc(100vh-3rem)] flex items-center justify-center">
                                 <div className="text-center p-8 bg-background/50 rounded-xl border-2 border-dashed">
-                                    <p className="text-lg text-muted-foreground">
-                                        Notes will appear here once you start adding content.
-                                        <br />
-                                        Select text and click send to notes, or start a new note.
-                                    </p>
+                                    <h2 className="text-2xl font-semibold">No document selected</h2>
+                                    <p className="text-muted-foreground text-sm mt-2">Create or open an existing note to get started.</p>
+                                    <Button
+                                        size="sm"
+                                        className="mt-4"
+                                        onClick={() => setIsModalOpen(true)}
+                                    >
+                                        <FilePenLine className="mr-2 w-4 h-4" />
+                                        Create New
+                                    </Button>
                                 </div>
                             </div>
                         )}
                     </CardContent>
                 </Card>
             </div>
-
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="bg-background border-border">
-                    <DialogHeader className="relative">
-                        <DialogTitle>Save Note</DialogTitle>
-                        <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="absolute top-0 right-0 text-muted-foreground hover:text-foreground transition"
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-                    </DialogHeader>
-                    <div className="space-y-4 pt-4">
-                        <Input
-                            placeholder="Note Title"
-                            value={noteTitle}
-                            onChange={(e) => setNoteTitle(e.target.value)}
-                            className="bg-background border-input"
-                        />
-                        <div className="flex justify-end gap-2">
-                            <Button
-                                variant="outline"
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleSaveNote}
-                            >
-                                Save
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 };
