@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SignIn, SignInButton, useAuth, UserButton, useUser } from "@clerk/nextjs";
 
@@ -45,7 +45,7 @@ interface Message {
     content: string;
 }
 
-export default function WorkspacePage() {
+function WorkspacePageContent() {
     // Replace getAuth with useAuth hook for client components
     const { userId, isLoaded } = useAuth();
     const { user } = useUser();
@@ -300,5 +300,14 @@ export default function WorkspacePage() {
                 </div>
             </SidebarInset>
         </SidebarProvider>
+    );
+}
+
+// Wrap the content in a Suspense boundary
+export default function WorkspacePage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <WorkspacePageContent />
+        </Suspense>
     );
 }
